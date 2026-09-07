@@ -1,0 +1,4 @@
+sqlalchemy
+asyncpg
+aiosqlite
+pytest-asyncio
