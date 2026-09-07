@@ -58,3 +58,8 @@ def test_record_from_result_has_no_id_before_insert():
     assert record.created_at is None
     assert record.image_path == "meal.png"
     assert record.totals.kcal == 234.0
+
+def test_record_from_result_preserves_meal_recognized_flag():
+    result = AnalysisResult(meal_recognized=False, image_path="blue.png")
+    record = AnalysisRecord.from_result(result)
+    assert record.meal_recognized is False

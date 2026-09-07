@@ -58,3 +58,26 @@ def test_env_var_override_via_monkeypatch(monkeypatch):
         assert s.max_parallel == 3
     finally:
         get_settings.cache_clear()
+
+def test_max_image_size_bytes_property():
+    s = Settings(_env_file=None, max_image_size_mb=2)
+    assert s.max_image_size_bytes == 2 * 1024 * 1024
+
+
+def test_get_settings_returns_a_settings_instance():
+    get_settings.cache_clear()
+    try:
+        s = get_settings()
+        assert isinstance(s, Settings)
+    finally:
+        get_settings.cache_clear()
+
+
+def test_get_settings_is_cached_singleton():
+    get_settings.cache_clear()
+    try:
+        first = get_settings()
+        second = get_settings()
+        assert first is second   
+    finally:
+        get_settings.cache_clear()
