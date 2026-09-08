@@ -1,9 +1,7 @@
-from datetime import datetime, timedelta, timezone
-
 import pytest
 import pytest_asyncio
 
-from src.models import AnalysisRecord
+from src.models import AnalysisRecord, IngredientLine, MealTotals
 from src.storage.repository import Repository
 
 
@@ -18,62 +16,69 @@ async def repository():
 	await repo.engine.dispose()
 
 
-def make_record(record_id: str, created_at: datetime, image_path: str) -> AnalysisRecord:
+def make_record(image_path: str, meal_recognized: bool = True) -> AnalysisRecord:
 	return AnalysisRecord(
-		id=record_id,
-		created_at=created_at,
+		id=None,
 		image_path=image_path,
-		ingredients=[{"name": "rice", "grams": 100}],
-		totals={"kcal": 130, "protein_g": 2.7},
-		status="ok",
+		meal_recognized=meal_recognized,
+		ingredients=[
+			IngredientLine(
+				name="rice",
+				estimated_grams=100,
+				confidence=0.95,
+				kcal=130,
+				protein_g=2.7,
+				carbs_g=28,
+				fat_g=0.3,
+			)
+		],
+		totals=MealTotals(kcal=130, protein_g=2.7, carbs_g=28, fat_g=0.3),
 	)
 
 
 async def test_init_models_creates_storage(repository):
-	record = make_record("init-1", datetime.now(timezone.utc), "meal.png")
+	record = make_record("meal.png")
 
 	await repository.save(record)
 
-	saved = await repository.get(record.id)
+	saved = await repository.get(1)
 	assert saved is not None
-	assert saved.id == record.id
+	assert saved.id == 1
 
 
 async def test_save_persists_analysis_record(repository):
-	record = make_record("save-1", datetime.now(timezone.utc), "meal.png")
+	record = make_record("meal.png", meal_recognized=False)
 
 	result = await repository.save(record)
 
-	assert result == record
-	saved = await repository.get(record.id)
+	assert result.id is not None
+	saved = await repository.get(result.id)
 	assert saved is not None
+	assert saved.id == result.id
 	assert saved.image_path == record.image_path
+	assert saved.meal_recognized is False
 	assert saved.ingredients == record.ingredients
 	assert saved.totals == record.totals
 
 
 async def test_get_returns_record_or_none(repository):
-	record = make_record("get-1", datetime.now(timezone.utc), "meal.png")
-	await repository.save(record)
+	record = await repository.save(make_record("meal.png"))
 
 	found = await repository.get(record.id)
 
 	assert found is not None
 	assert found.id == record.id
-	assert found.status == "ok"
-	assert await repository.get("missing") is None
+	assert found.meal_recognized is True
+	assert await repository.get(999) is None
 
 
 async def test_list_recent_returns_latest_records_with_limit(repository):
-	now = datetime.now(timezone.utc)
 	records = [
-		make_record("old", now - timedelta(minutes=2), "old.png"),
-		make_record("latest", now, "latest.png"),
-		make_record("middle", now - timedelta(minutes=1), "middle.png"),
+		await repository.save(make_record("old.png")),
+		await repository.save(make_record("middle.png")),
+		await repository.save(make_record("latest.png")),
 	]
-	for record in records:
-		await repository.save(record)
 
 	recent = await repository.list_recent(limit=2)
 
-	assert [record.id for record in recent] == ["latest", "middle"]
+	assert [record.id for record in recent] == [records[2].id, records[1].id]
