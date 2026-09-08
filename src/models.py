@@ -74,6 +74,7 @@ class AnalysisRecord(BaseModel):
     id: int | None = None
     created_at: datetime | None = None
     image_path: str
+    meal_recognized: bool = True
     ingredients: list[IngredientLine] = Field(default_factory=list)
     totals: MealTotals = Field(default_factory=MealTotals)
 
@@ -82,6 +83,7 @@ class AnalysisRecord(BaseModel):
         """Turn a fresh AnalysisResult into a record ready for insertion."""
         return cls(
             image_path=result.image_path,
+            meal_recognized=result.meal_recognized,
             ingredients=result.ingredients,
             totals=result.totals,
         )
