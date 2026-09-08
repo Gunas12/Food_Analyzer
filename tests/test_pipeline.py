@@ -170,6 +170,15 @@ async def test_provider_failure_preserves_other_results_and_logs_warning(
 
 
 @pytest.mark.asyncio
+async def test_all_provider_failures_return_empty_mapping() -> None:
+    provider = RecordingNutrition({"rice": [ProviderError("unavailable")]})
+    pipeline = NutritionPipeline(provider, ai_service=AIService(max_attempts=1))
+
+    assert await pipeline.lookup([ingredient("rice"), ingredient("RICE")]) == {}
+    assert provider.calls == ["rice"]
+
+
+@pytest.mark.asyncio
 async def test_cache_hit_skips_provider_on_later_batch() -> None:
     provider = RecordingNutrition()
     pipeline = NutritionPipeline(provider)
@@ -180,6 +189,34 @@ async def test_cache_hit_skips_provider_on_later_batch() -> None:
     assert first == {"rice": _FACTS}
     assert second == {" RICE ": _FACTS}
     assert provider.calls == ["rice"]
+
+
+@pytest.mark.asyncio
+async def test_prepopulated_cache_avoids_provider() -> None:
+    cache = NutritionCache()
+    cache.set("rice", _FACTS)
+    provider = RecordingNutrition()
+
+    result = await NutritionPipeline(provider, cache=cache).lookup([ingredient("RICE")])
+
+    assert result == {"RICE": _FACTS}
+    assert provider.calls == []
+
+
+@pytest.mark.asyncio
+async def test_expired_cache_triggers_a_new_lookup() -> None:
+    now = 0.0
+    cache = NutritionCache(ttl_seconds=10, clock=lambda: now)
+    provider = RecordingNutrition()
+    pipeline = NutritionPipeline(provider, cache=cache)
+
+    await pipeline.lookup([ingredient("rice")])
+    now = 9
+    await pipeline.lookup([ingredient("rice")])
+    assert provider.calls == ["rice"]
+    now = 10
+    assert await pipeline.lookup([ingredient("rice")]) == {"rice": _FACTS}
+    assert provider.calls == ["rice", "rice"]
 
 
 @pytest.mark.asyncio
@@ -195,6 +232,92 @@ async def test_duplicates_share_lookup_and_preserve_all_portions(ttl_seconds: fl
     assert provider.calls == [" Rice "]
     assert compute_totals(inputs, result).kcal == pytest.approx(227.5)
     assert _FACTS.name not in result
+
+
+@pytest.mark.asyncio
+async def test_lookup_recovers_after_retries_and_caches_success() -> None:
+    provider = RecordingNutrition({"rice": [ProviderError("first"), ProviderError("second")]})
+    sleep = AsyncMock()
+    cache = NutritionCache()
+    service = AIService(max_attempts=3, base_delay=0.2, sleep=sleep)
+    pipeline = NutritionPipeline(provider, cache=cache, ai_service=service)
+
+    assert await pipeline.lookup([ingredient("rice")]) == {"rice": _FACTS}
+    assert cache.get("rice") is _FACTS
+    assert await pipeline.lookup([ingredient("RICE")]) == {"RICE": _FACTS}
+    assert provider.calls == ["rice"] * 3
+    assert [call.args[0] for call in sleep.await_args_list] == [0.2, 0.4]
+
+
+@pytest.mark.asyncio
+async def test_failed_lookup_can_be_attempted_in_a_later_batch() -> None:
+    provider = RecordingNutrition({"rice": [ProviderError("temporary failure")]})
+    pipeline = NutritionPipeline(provider, ai_service=AIService(max_attempts=1))
+
+    assert await pipeline.lookup([ingredient("rice")]) == {}
+    assert await pipeline.lookup([ingredient("rice")]) == {"rice": _FACTS}
+    assert provider.calls == ["rice", "rice"]
+
+
+@pytest.mark.asyncio
+async def test_cache_is_rechecked_after_waiting_for_a_semaphore_slot() -> None:
+    entered = asyncio.Event()
+    release = asyncio.Event()
+    cache = NutritionCache()
+    provider = RecordingNutrition()
+
+    class PausedService(AIService):
+        async def lookup_nutrition(
+            self, provider: NutritionProvider, ingredient_name: str,
+        ) -> NutritionFacts:
+            entered.set()
+            await release.wait()
+            return await super().lookup_nutrition(provider, ingredient_name)
+
+    pipeline = NutritionPipeline(provider, cache=cache, ai_service=PausedService(), max_parallel=1)
+    task = asyncio.create_task(pipeline.lookup([ingredient("rice"), ingredient("broccoli")]))
+    try:
+        await asyncio.wait_for(entered.wait(), timeout=10)
+        # Both batch coroutines have started; broccoli is waiting on the slot.
+        cache.set("broccoli", _FACTS)
+    finally:
+        release.set()
+        result = await asyncio.wait_for(task, timeout=10)
+
+    assert result == {"rice": _FACTS, "broccoli": _FACTS}
+    assert provider.calls == ["rice"]
+
+
+@pytest.mark.asyncio
+async def test_non_provider_error_propagates_without_retry() -> None:
+    original = ValueError("invalid ingredient")
+    provider = RecordingNutrition({"rice": [original]})
+    sleep = AsyncMock()
+    pipeline = NutritionPipeline(provider, ai_service=AIService(sleep=sleep))
+
+    with pytest.raises(ValueError) as caught:
+        await pipeline.lookup([ingredient("rice")])
+
+    assert caught.value is original
+    assert provider.calls == ["rice"]
+    sleep.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_empty_input_never_calls_provider() -> None:
+    provider = RecordingNutrition()
+
+    assert await NutritionPipeline(provider).lookup([]) == {}
+    assert provider.calls == []
+
+
+@pytest.mark.asyncio
+async def test_generator_input_and_existing_fake_provider(fake_nutrition) -> None:
+    inputs = [ingredient("white rice (cooked)", 200), ingredient("broccoli", 80)]
+    result = await NutritionPipeline(fake_nutrition).lookup(item for item in inputs)
+
+    assert set(result) == {item.name for item in inputs}
+    assert compute_totals(inputs, result).kcal == pytest.approx(287.2)
 
 
 @pytest.mark.parametrize("max_parallel", [0, -1, -10, 1.5, True])

@@ -165,6 +165,92 @@ async def test_default_identification_function_can_be_replaced(
     assert calls == [("meal.png", None)]
 
 
+@pytest.mark.asyncio
+async def test_nutrition_lookup_uses_the_same_retry_policy(fake_nutrition) -> None:
+    expected = fake_nutrition.lookup("broccoli")
+
+    class RecoveringNutrition(NutritionProvider):
+        def __init__(self) -> None:
+            self.calls: list[str] = []
+            self.thread_ids: list[int] = []
+
+        def lookup(self, ingredient_name: str) -> NutritionFacts:
+            self.calls.append(ingredient_name)
+            self.thread_ids.append(threading.get_ident())
+            if len(self.calls) < 3:
+                raise ProviderError("temporary failure")
+            return expected
+
+    provider = RecoveringNutrition()
+    sleep = AsyncMock()
+    result = await AIService(base_delay=0.125, sleep=sleep).lookup_nutrition(
+        provider, "broccoli",
+    )
+
+    assert result is expected
+    assert provider.calls == ["broccoli"] * 3
+    assert all(thread_id != threading.get_ident() for thread_id in provider.thread_ids)
+    assert [call.args[0] for call in sleep.await_args_list] == [0.125, 0.25]
+
+
+@pytest.mark.asyncio
+async def test_event_loop_progresses_while_identification_is_blocked() -> None:
+    loop = asyncio.get_running_loop()
+    started = asyncio.Event()
+    release = threading.Event()
+
+    class BlockingVLM(VLMProvider):
+        def describe(
+            self,
+            image_path: str,
+            prompt: str,
+            *,
+            json_schema: dict | None = None,
+        ) -> str:
+            loop.call_soon_threadsafe(started.set)
+            if not release.wait(timeout=10):
+                raise AssertionError("The event loop did not release the provider")
+            return _MEAL_RESPONSE
+
+    task = asyncio.create_task(
+        AIService().identify_ingredients("meal.png", vlm=BlockingVLM())
+    )
+    try:
+        await asyncio.wait_for(started.wait(), timeout=10)
+        assert not task.done()
+    finally:
+        release.set()
+        result = await asyncio.wait_for(task, timeout=10)
+
+    assert result[0].name == "rice"
+
+
+@pytest.mark.asyncio
+async def test_cancellation_during_backoff_stops_retries() -> None:
+    waiting = asyncio.Event()
+    hold = asyncio.Event()
+    delays: list[float] = []
+    provider = ScriptedVLM([ProviderError("temporary failure"), _MEAL_RESPONSE])
+
+    async def controlled_sleep(delay: float) -> None:
+        delays.append(delay)
+        waiting.set()
+        await hold.wait()
+
+    task = asyncio.create_task(
+        AIService(sleep=controlled_sleep).identify_ingredients("meal.png", vlm=provider)
+    )
+    try:
+        await asyncio.wait_for(waiting.wait(), timeout=10)
+    finally:
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+
+    assert len(provider.calls) == 1
+    assert delays == [0.5]
+
+
 @pytest.mark.parametrize("max_attempts", [0, -1, 1.5, True])
 def test_invalid_attempt_limit_is_rejected(max_attempts: int) -> None:
     with pytest.raises(ValueError, match="max_attempts must be an integer of at least 1"):
