@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="az">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Food Analyzer</title>
+    <style>
+      :root {
+        --ink: #14130f;
+        --paper: #fdfcf8;
+        --line: #14130f;
+        --muted: #6b6a63;
+        --accent: #8b1e3f;
+        --accent-bg: #f6e9ec;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #eeece3;
+        color: var(--ink);
+        font-family: "Helvetica Neue", Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        padding: 48px 20px 80px;
+      }
+      main {
+        width: 100%;
+        max-width: 760px;
+      }
+
+      header.page-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 28px;
+        border-bottom: 3px solid var(--line);
+        padding-bottom: 10px;
+      }
+      header.page-head h1 {
+        font-size: 22px;
+        letter-spacing: -0.02em;
+        margin: 0;
+        font-weight: 700;
+      }
+      header.page-head span {
+        font-size: 12px;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        gap: 32px;
+      }
+      @media (max-width: 640px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      #dropzone {
+        background: var(--paper);
+        border: 2px dashed #c9c6ba;
+        border-radius: 4px;
+        height: 260px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        cursor: pointer;
+        padding: 16px;
+        transition:
+          border-color 0.15s ease,
+          background 0.15s ease;
+      }
+      #dropzone.drag {
+        border-color: var(--accent);
+        background: var(--accent-bg);
+      }
+      #dropzone img {
+        max-width: 100%;
+        max-height: 210px;
+        border-radius: 2px;
+        object-fit: contain;
+      }
+      #dropzone p {
+        margin: 0;
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      #dropzone .hint {
+        font-size: 11px;
+        margin-top: 6px;
+        color: #99968a;
+      }
+      #file-input {
+        display: none;
+      }
+
+      button#submit {
+        margin-top: 14px;
+        width: 100%;
+        background: var(--ink);
+        color: var(--paper);
+        border: none;
+        border-radius: 3px;
+        padding: 12px;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        cursor: pointer;
+      }
+      button#submit:disabled {
+        background: #b9b7ac;
+        cursor: default;
+      }
+      button#submit:not(:disabled):hover {
+        background: #2a2822;
+      }
+
+      #status {
+        margin-top: 10px;
+        font-size: 12px;
+        color: var(--muted);
+        min-height: 16px;
+      }
+      #status.error {
+        color: var(--accent);
+      }
+
+      /* --- Nutrition facts panel --- */
+      #panel {
+        background: var(--paper);
+        border: 1px solid #d8d5c9;
+        border-radius: 4px;
+        padding: 20px 22px 8px;
+        display: none;
+      }
+      #panel.show {
+        display: block;
+      }
+
+      .nf-title {
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin: 0 0 2px;
+      }
+      .nf-sub {
+        font-size: 12px;
+        color: var(--muted);
+        margin: 0 0 10px;
+        word-break: break-all;
+      }
+      .rule-thick {
+        border: none;
+        border-top: 8px solid var(--ink);
+        margin: 6px 0;
+      }
+      .rule {
+        border: none;
+        border-top: 1px solid #c9c6ba;
+        margin: 0;
+      }
+      .rule-mid {
+        border: none;
+        border-top: 4px solid var(--ink);
+        margin: 8px 0;
+      }
+
+      .kcal-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 6px 0;
+      }
+      .kcal-row .label {
+        font-size: 18px;
+        font-weight: 700;
+      }
+      .kcal-row .value {
+        font-size: 30px;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+      }
+
+      table.macros {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 4px;
+      }
+      table.macros th {
+        text-align: left;
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-weight: 700;
+        padding: 6px 4px;
+        border-bottom: 1px solid var(--ink);
+      }
+      table.macros th.num,
+      table.macros td.num {
+        text-align: right;
+      }
+      table.macros td {
+        font-size: 13px;
+        padding: 7px 4px;
+        border-bottom: 1px solid #e4e1d5;
+        font-variant-numeric: tabular-nums;
+      }
+      table.macros tr.total td {
+        font-weight: 700;
+        border-top: 2px solid var(--ink);
+        border-bottom: none;
+      }
+
+      #not-recognized {
+        display: none;
+        padding: 20px 0 8px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      #not-recognized.show {
+        display: block;
+      }
+
+      #placeholder-panel {
+        color: var(--muted);
+        font-size: 13px;
+        padding: 40px 4px;
+        text-align: center;
+        border: 1px dashed #d8d5c9;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="page-head">
+        <h1>Food Analyzer</h1>
+        <span id="health-indicator">checking API…</span>
+      </header>
+
+      <div class="layout">
+        <div>
+          <div id="dropzone">
+            <p>
+              <strong>Yeməyin şəklini</strong> bura sürüşdür<br />və ya
+              klikləyib seç
+            </p>
+            <p class="hint">JPEG / PNG</p>
+            <input id="file-input" type="file" accept="image/jpeg,image/png" />
+          </div>
+          <button id="submit" disabled>Analiz et</button>
+          <div id="status"></div>
+        </div>
+
+        <div>
+          <div id="placeholder-panel">Nəticə burada görünəcək.</div>
+
+          <div id="panel">
+            <p class="nf-title">Nutrition facts</p>
+            <p class="nf-sub" id="nf-filename">—</p>
+            <hr class="rule-thick" />
+            <div class="kcal-row">
+              <span class="label">Calories</span>
+              <span class="value" id="nf-kcal">0</span>
+            </div>
+            <hr class="rule-mid" />
+            <table class="macros">
+              <thead>
+                <tr>
+                  <th>Ingredient</th>
+                  <th class="num">g</th>
+                  <th class="num">kcal</th>
+                  <th class="num">protein</th>
+                  <th class="num">carbs</th>
+                  <th class="num">fat</th>
+                </tr>
+              </thead>
+              <tbody id="nf-rows"></tbody>
+            </table>
+          </div>
+
+          <div id="not-recognized">
+            Şəkildə yemək tanınmadı. Başqa bir şəkil sınayın.
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const dropzone = document.getElementById("dropzone");
+      const fileInput = document.getElementById("file-input");
+      const submitBtn = document.getElementById("submit");
+      const statusEl = document.getElementById("status");
+      const panel = document.getElementById("panel");
+      const notRecognized = document.getElementById("not-recognized");
+      const placeholder = document.getElementById("placeholder-panel");
+      const healthIndicator = document.getElementById("health-indicator");
+
+      let selectedFile = null;
+
+      function setStatus(text, isError) {
+        statusEl.textContent = text || "";
+        statusEl.classList.toggle("error", Boolean(isError));
+      }
+
+      function fmt(n) {
+        const num = Number(n) || 0;
+        return num % 1 === 0 ? num.toFixed(0) : num.toFixed(1);
+      }
+
+      function onFileChosen(file) {
+        if (!file) return;
+        if (!["image/jpeg", "image/png"].includes(file.type)) {
+          setStatus("Yalnız JPEG və ya PNG qəbul olunur.", true);
+          return;
+        }
+        selectedFile = file;
+        submitBtn.disabled = false;
+        setStatus("");
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          dropzone.innerHTML = `<img src="${e.target.result}" alt="Seçilmiş şəkil" />`;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      dropzone.addEventListener("click", () => fileInput.click());
+      fileInput.addEventListener("change", (e) =>
+        onFileChosen(e.target.files[0]),
+      );
+
+      ["dragenter", "dragover"].forEach((evt) =>
+        dropzone.addEventListener(evt, (e) => {
+          e.preventDefault();
+          dropzone.classList.add("drag");
+        }),
+      );
+      ["dragleave", "drop"].forEach((evt) =>
+        dropzone.addEventListener(evt, (e) => {
+          e.preventDefault();
+          dropzone.classList.remove("drag");
+        }),
+      );
+      dropzone.addEventListener("drop", (e) => {
+        const file = e.dataTransfer.files && e.dataTransfer.files[0];
+        onFileChosen(file);
+      });
+
+      submitBtn.addEventListener("click", async () => {
+        if (!selectedFile) return;
+        submitBtn.disabled = true;
+        setStatus("Analiz olunur…");
+        panel.classList.remove("show");
+        notRecognized.classList.remove("show");
+        placeholder.style.display = "none";
+
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+
+        try {
+          const resp = await fetch("/analyze", {
+            method: "POST",
+            body: formData,
+          });
+          if (!resp.ok) {
+            const body = await resp.json().catch(() => ({}));
+            throw new Error(body.detail || `Server xətası (${resp.status})`);
+          }
+          const data = await resp.json();
+          renderResult(data);
+          setStatus("");
+        } catch (err) {
+          setStatus(err.message || "Naməlum xəta baş verdi.", true);
+          placeholder.style.display = "block";
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+
+      function renderResult(record) {
+        if (!record.meal_recognized) {
+          notRecognized.classList.add("show");
+          return;
+        }
+        document.getElementById("nf-filename").textContent =
+          record.image_path || "";
+        document.getElementById("nf-kcal").textContent = fmt(
+          record.totals.kcal,
+        );
+
+        const rowsEl = document.getElementById("nf-rows");
+        rowsEl.innerHTML = "";
+        record.ingredients.forEach((ing) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+        <td>${ing.name}</td>
+        <td class="num">${fmt(ing.estimated_grams)}</td>
+        <td class="num">${fmt(ing.kcal)}</td>
+        <td class="num">${fmt(ing.protein_g)}</td>
+        <td class="num">${fmt(ing.carbs_g)}</td>
+        <td class="num">${fmt(ing.fat_g)}</td>
+      `;
+          rowsEl.appendChild(tr);
+        });
+        const totalTr = document.createElement("tr");
+        totalTr.className = "total";
+        totalTr.innerHTML = `
+      <td>Total</td>
+      <td class="num">—</td>
+      <td class="num">${fmt(record.totals.kcal)}</td>
+      <td class="num">${fmt(record.totals.protein_g)}</td>
+      <td class="num">${fmt(record.totals.carbs_g)}</td>
+      <td class="num">${fmt(record.totals.fat_g)}</td>
+    `;
+        rowsEl.appendChild(totalTr);
+
+        panel.classList.add("show");
+      }
+
+      // Ping /health on load so a stopped API is obvious immediately.
+      fetch("/health")
+        .then((r) => (r.ok ? r.json() : Promise.reject()))
+        .then(() => {
+          healthIndicator.textContent = "API online";
+        })
+        .catch(() => {
+          healthIndicator.textContent = "API oflayn";
+          healthIndicator.style.color = "#8b1e3f";
+        });
+    </script>
+  </body>
+</html>
