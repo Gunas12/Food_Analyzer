@@ -37,6 +37,7 @@ def build_components(settings: Settings) -> Components:
     (e.g. the cache) across many analyses, like the API does per-process,
     should build once and reuse the returned Components.
     """
+    assert settings.database_url is not None, "build_database_url always sets this"
     repository = Repository(settings.database_url)
     ai_service = AIService()
     nutrition_provider = get_nutrition_provider()
