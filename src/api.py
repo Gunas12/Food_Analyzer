@@ -22,6 +22,8 @@ from pathlib import Path
 from typing import Callable, Optional
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 
 from ai import Ingredient, NutritionFacts, NutritionProvider, compute_totals, get_nutrition_provider
@@ -148,6 +150,7 @@ def create_app(
     everything is derived from `get_settings()`.
     """
     settings = get_settings()
+    assert settings.database_url is not None, "build_database_url always sets this"
     repo = repository or Repository(settings.database_url)
     upload_dir = upload_dir or Path(settings.upload_dir)
     max_mb = max_image_size_mb if max_image_size_mb is not None else settings.max_image_size_mb
@@ -177,6 +180,14 @@ def create_app(
     app.state.repository = repo
     app.state.ai_service = shared_ai_service
     app.state.nutrition_cache = shared_cache
+
+    static_dir = Path(__file__).resolve().parent.parent / "static"
+    if static_dir.is_dir():
+        app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+        @app.get("/")
+        async def index() -> FileResponse:
+            return FileResponse(static_dir / "index.html")
 
     @app.get("/health")
     async def health() -> dict:
