@@ -1,13 +1,91 @@
+
+# ============================================================
+# AI PACKAGE DEPENDENCIES
+# ============================================================
+# Dependencies required to run the provided ai/ package.
+# These packages are used by the AI providers and schemas.
+# ============================================================
+
+numpy>=1.24
+pydantic>=2.7
+requests>=2.31     # Used by USDAProvider
+
+# AI providers
+# Uncomment the provider(s) that are actually used.
+# google-genai is enabled below because this project uses Gemini.
+
+google-genai==1.0.0
+
+# Optional AI providers:
+# anthropic>=0.39.0
+# openai>=1.50.0
+
+
+# ============================================================
+# FOOD ANALYZER PROJECT DEPENDENCIES
+# ============================================================
+# Dependencies added specifically for the Food Analyzer
+# application: API, database, image processing, testing, etc.
+# ============================================================
+
+
+# ------------------------------------------------------------
+# Image Processing
+# ------------------------------------------------------------
+# Pillow -> Image loading and image processing
+
 Pillow==12.3.0
 
-pytest-cov==7.1.0
+
+# ------------------------------------------------------------
+# Configuration & Validation
+# ------------------------------------------------------------
+# pydantic-settings -> Environment/configuration management
+
 pydantic-settings==2.15.0
-SQLAlchemy==2.0.52
-asyncpg==0.31.0
-aiosqlite==0.22.1
-pytest-asyncio==1.4.0
+
+
+# ------------------------------------------------------------
+# Web API
+# ------------------------------------------------------------
+# FastAPI          -> REST API framework
+# Uvicorn          -> ASGI server
+# python-multipart -> File upload support
+# httpx            -> HTTP client / API testing
+
 fastapi==0.141.1
 uvicorn==0.52.4
 python-multipart==0.0.32
 httpx==0.28.1
-google-genai==1.0.0
+
+
+# ------------------------------------------------------------
+# Database
+# ------------------------------------------------------------
+# SQLAlchemy -> ORM and database abstraction
+# asyncpg    -> Async PostgreSQL driver
+# aiosqlite  -> Async SQLite driver
+
+SQLAlchemy==2.0.52
+asyncpg==0.31.0
+aiosqlite==0.22.1
+
+
+# ------------------------------------------------------------
+# Testing
+# ------------------------------------------------------------
+# pytest        -> Test framework
+# pytest-cov    -> Test coverage
+# pytest-asyncio -> Async test support
+
+pytest>=8.0
+pytest-cov==7.1.0
+pytest-asyncio==1.4.0
+
+
+# ------------------------------------------------------------
+# Development / Type Checking
+# ------------------------------------------------------------
+# mypy -> Static type checking
+
+mypy==2.3.1
