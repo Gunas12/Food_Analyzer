@@ -15,6 +15,9 @@ Storage is User #2's `Repository`, config is User #1's `Settings`.
 
 from __future__ import annotations
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import logging
 import uuid
 from contextlib import asynccontextmanager
@@ -201,7 +204,7 @@ def create_app(
         try:
             ingredients = await shared_ai_service.identify_ingredients(str(image_path), vlm=vlm)
         except ProviderError as e:
-            logger.warning("vlm_call_failed", extra={"error": str(e)})
+            logger.warning(f"vlm_call_failed: {e}")
             raise HTTPException(status_code=503, detail="AI provider unavailable.") from e
 
         if not ingredients:
