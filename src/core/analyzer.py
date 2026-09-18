@@ -3,16 +3,18 @@ totals -> persisted AnalysisRecord.
 
 This is the one place that wires validation, AI identification, the
 concurrent nutrition pipeline, and storage together. `cli.py` is a thin
-adapter over `FoodAnalyzer.analyze` — it doesn't duplicate this logic
-(the API doesn't call this class today; it builds its own inline flow in
-create_app(), but the steps mirror each other 1:1).
+adapter over `FoodAnalyzer.analyze`. The HTTP API's `/analyze` endpoint
+does not call this class directly (it needs to interleave upload-specific
+steps — content-type checks, per-step 503s — with the pipeline calls),
+but it shares the same ingredient/totals-building logic via
+`src.core.lines.build_ingredient_lines`, so that piece cannot drift
+between the two entry points.
 """
 
 from __future__ import annotations
 
-from ai.calculator import compute_totals
-
-from src.models import AnalysisRecord, IngredientLine, MealTotals
+from src.core.lines import build_ingredient_lines
+from src.models import AnalysisRecord
 from src.services import AIService, NutritionCache
 from src.storage.repository import Repository
 from src.validation import ValidationError, validate_image_path
@@ -53,35 +55,7 @@ class FoodAnalyzer:
             return await self._repository.save(record)
 
         facts_by_name = await self._pipeline.lookup(ingredients)
-
-        lines: list[IngredientLine] = []
-        for ing in ingredients:
-            facts = facts_by_name.get(ing.name)
-            if facts is None:
-                lines.append(
-                    IngredientLine(
-                        name=ing.name,
-                        estimated_grams=ing.estimated_grams,
-                        confidence=ing.confidence,
-                        kcal=0.0, protein_g=0.0, carbs_g=0.0, fat_g=0.0,
-                    )
-                )
-                continue
-            portion = facts.for_grams(ing.estimated_grams)
-            lines.append(
-                IngredientLine(
-                    name=ing.name,
-                    estimated_grams=ing.estimated_grams,
-                    confidence=ing.confidence,
-                    kcal=portion.kcal,
-                    protein_g=portion.protein_g,
-                    carbs_g=portion.carbs_g,
-                    fat_g=portion.fat_g,
-                )
-            )
-
-        totals_nutrition = compute_totals(ingredients, facts_by_name)
-        totals = MealTotals(**totals_nutrition.to_dict())
+        lines, totals = build_ingredient_lines(ingredients, facts_by_name)
 
         record = AnalysisRecord(
             image_path=str(validated_path),

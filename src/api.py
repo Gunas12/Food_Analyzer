@@ -29,12 +29,13 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 
-from ai import Ingredient, NutritionFacts, NutritionProvider, compute_totals, get_nutrition_provider
+from ai import NutritionProvider, get_nutrition_provider
 from ai.providers.base import ProviderError, VLMProvider
 
 from src.concurrency import NutritionPipeline
 from src.config import get_settings
-from src.models import AnalysisRecord, IngredientLine, MealTotals
+from src.core.lines import build_ingredient_lines
+from src.models import AnalysisRecord, MealTotals
 from src.services import AIService, NutritionCache
 from src.storage.repository import Repository
 
@@ -87,53 +88,6 @@ async def _validate_and_save_image(
     path = _safe_upload_path(upload_dir, file.filename or "")
     path.write_bytes(contents)
     return path
-
-
-def _build_ingredient_lines(
-    ingredients: list[Ingredient],
-    facts_by_name: dict[str, NutritionFacts],
-) -> tuple[list[IngredientLine], MealTotals]:
-    """Turn ingredients + looked-up facts into the SE-layer response shape.
-
-    An ingredient with no entry in `facts_by_name` (lookup failed even
-    after the pipeline's retries) is still listed, just with zero macros —
-    one bad lookup must not sink the rest of the meal.
-    """
-    lines: list[IngredientLine] = []
-    for ing in ingredients:
-        facts = facts_by_name.get(ing.name)
-        if facts is None:
-            lines.append(
-                IngredientLine(
-                    name=ing.name,
-                    estimated_grams=ing.estimated_grams,
-                    confidence=ing.confidence,
-                    kcal=0.0,
-                    protein_g=0.0,
-                    carbs_g=0.0,
-                    fat_g=0.0,
-                )
-            )
-            continue
-
-        # facts are per-100g; scale to this ingredient's estimated portion.
-        portion = facts.for_grams(ing.estimated_grams)
-        lines.append(
-            IngredientLine(
-                name=ing.name,
-                estimated_grams=ing.estimated_grams,
-                confidence=ing.confidence,
-                kcal=portion.kcal,
-                protein_g=portion.protein_g,
-                carbs_g=portion.carbs_g,
-                fat_g=portion.fat_g,
-            )
-        )
-
-    # Reuse the ai/ package's own totals function rather than summing by hand.
-    totals_nutrition = compute_totals(ingredients, facts_by_name)
-    totals = MealTotals(**totals_nutrition.to_dict())
-    return lines, totals
 
 
 def create_app(
@@ -230,8 +184,8 @@ def create_app(
             max_parallel=parallel_limit,
         )
         facts_by_name = await pipeline.lookup(ingredients)
-        lines, totals = _build_ingredient_lines(ingredients, facts_by_name)
-
+        lines, totals = build_ingredient_lines(ingredients, facts_by_name)
+        
         try:
             record = AnalysisRecord(
                 image_path=str(image_path),

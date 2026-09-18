@@ -6,9 +6,9 @@
 # These packages are used by the AI providers and schemas.
 # ============================================================
 
-numpy>=1.24
-pydantic>=2.7
-requests>=2.31     # Used by USDAProvider
+numpy==2.4.4
+pydantic==2.13.5
+requests==2.33.1     # Used by USDAProvider
 
 # AI providers
 # Uncomment the provider(s) that are actually used.
@@ -78,7 +78,7 @@ aiosqlite==0.22.1
 # pytest-cov    -> Test coverage
 # pytest-asyncio -> Async test support
 
-pytest>=8.0
+pytest==9.1.1
 pytest-cov==7.1.0
 pytest-asyncio==1.4.0
 

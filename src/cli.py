@@ -1,7 +1,7 @@
 """CLI entrypoint.
 
 Usage:
-    python -m src.cli analyze <path/to/photo.jpg>
+    python -m foodanalyzer analyze <path/to/photo.jpg>
 
 Runs the same FoodAnalyzer pipeline as the HTTP API, prints a totals
 table, and exits non-zero on validation errors (so it's script-friendly).
@@ -64,7 +64,7 @@ async def _run_analyze(image_path: str) -> int:
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(prog="python -m src.cli")
+    parser = argparse.ArgumentParser(prog="python -m foodanalyzer")
     sub = parser.add_subparsers(dest="command", required=True)
 
     analyze_p = sub.add_parser("analyze", help="Analyze one meal photo")
