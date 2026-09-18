@@ -42,7 +42,7 @@
 
 **Co-owned:**
 
-- `requirements.txt`, `requirements-ai.txt` — storage deps (`sqlalchemy`, `asyncpg`, `aiosqlite`, `pytest-asyncio`)
+- `requirements.txt` — storage deps (`sqlalchemy`, `asyncpg`, `aiosqlite`, `pytest-asyncio`)
 - `Dockerfile` (with Member 1) — Postgres service wiring in `docker-compose.yml`
 
 **PRs:** #4 (Repository asinxron funksiyaları və testləri), #5 (fix: Repository testlərinin yeni modelə uyğunlaşdırılması), #12 (feat: CLI, Dockerfile, API service in docker-compose), #16 (Fix mypy errors), #17 (docs: README fayli elave edildi)
@@ -87,10 +87,13 @@
 - `static/index.html` — single-page browser demo UI: drag-and-drop image upload, nutrition-facts results table, analysis history
 - `tests/test_api.py` — endpoint tests via FastAPI `TestClient` (`/health`, `/analyze` offline, `/analyses/{id}`)
 - `scripts/bench.py` — sequential vs. concurrent nutrition-lookup benchmark, results fed into the README
+- `src/core/lines.py` — extracted the ingredient/totals-building logic previously duplicated between `src/api.py` and `src/core/analyzer.py` into one shared function, removing the duplication between the API and CLI entry points
+- `foodanalyzer/` (`__init__.py`, `__main__.py`) — thin entrypoint package so `python -m foodanalyzer analyze <path>` matches the project spec's required demo command
+- `mypy.ini` — scopes out a pre-existing type error in the provided (unmodifiable) `ai/` package so `mypy src/` reports our own code's status accurately
 
 **Co-owned:**
 
-- `requirements.txt` (with the whole team) — API deps (`fastapi`, `uvicorn`, `python-multipart`, `httpx`) kept in sync
+- `requirements.txt` (with the whole team) — API deps (`fastapi`, `uvicorn`, `python-multipart`, `httpx`) kept in sync; also pinned `numpy`, `pydantic`, `requests`, `pytest` to exact versions
 - Template/doc files (`.github/pull_request_template.md`) — team PR-description checklist
 
 **PRs:** #10 (add: FastAPI endpoints for analyze/health/get), #13 (add: google-genai dependency, static web UI, PR template), #15, #18 (fix(api): assert database_url before Repository construction), #19 (user4/fix-api-mypy)
