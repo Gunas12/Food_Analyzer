@@ -5,8 +5,8 @@ WORKDIR /build
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-COPY requirements-ai.txt requirements.txt ./
-RUN pip install --no-cache-dir -r requirements-ai.txt -r requirements.txt
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
 # ---- Runtime stage ----
 FROM python:3.12-slim
