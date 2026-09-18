@@ -1,96 +1,272 @@
-# AI Engineering — Software Engineering Final Project (v2)
+# Food Analyzer
 
-**AI Academy, National AI Center · Spring 2026**
+> Upload a meal photo → AI identifies ingredients with portion sizes → USDA nutrition
+> lookup → calories and macronutrient totals.
 
-This is the distributable package for the Software Engineering final project. It contains everything students need: the project brief, the topic codebases (with their provided AI modules), report and slide templates, and documentation.
-
-**Released:** May 11, 2026
-**Due:** **May 23, 2026 at 23:59 (UTC+4)**
+**Team:** Team #1
+**Topic:** Topic 2 — AI Food Analyzer
+**Course:** AI-ENG-110 Software Engineering, AI Academy
+**Repository:** https://github.com/Gunas12/Food_Analyzer
+**Final tag:** `v1.0-final`
 
 ---
 
-## What to read first
-
-1. **`SOFTWARE_PROJECT.pdf`** — the authoritative project description, requirements, rubric, deadlines. Start here.
-2. **`docs/TIMELINE.md`** — recommended 12-day milestone schedule.
-3. Your chosen topic's **`TOPIC.md`** — what the provided AI module does and what you build around it.
-4. **`docs/COMMON_PITFALLS.md`** — every mistake previous students have made. Read before Day 9.
-
-## What's where
-
-```
-AIENG_FinalProject_v2/
-│
-├── SOFTWARE_PROJECT.pdf         ← the project description (start here; authoritative)
-├── SOFTWARE_PROJECT.tex         ← LaTeX source for the brief
-├── README.md                    ← this file
-│
-├── templates/                   ← templates you fill in for submission
-│   ├── REPORT_TEMPLATE.tex      → produces report/report.pdf
-│   ├── REPORT_TEMPLATE.pdf      ← compiled preview
-│   ├── SLIDES_TEMPLATE.tex      → produces your defense slides (Beamer)
-│   ├── SLIDES_TEMPLATE.pdf      ← compiled preview
-│   ├── CONTRIBUTION_STATEMENT.md
-│   ├── STUDENT_README_TEMPLATE.md   ← model README for your repo
-│   ├── Dockerfile.template      ← starting-point Dockerfile
-│   └── pull_request_template.md ← put at .github/ in your repo
-│
-├── docs/                        ← guidance, not graded directly but read carefully
-│   ├── TIMELINE.md              ← 12-day milestone schedule
-│   ├── GIT_WORKFLOW.md          ← branch model, PR process, tagging
-│   ├── COMMON_PITFALLS.md       ← what previous teams got wrong
-│   └── ADVANCED_BONUSES.md      ← +10 bonus points for strong teams
-│
-├── topic-1-lost-and-found/      ← AI module + sample data + smoke tests
-├── topic-2-food-analyzer/       ← (pick exactly ONE of the four topics)
-├── topic-3-news-briefing/
-└── topic-4-research-assistant/
-```
-
-## What you receive
-
-For each of the four topics, the course provides a runnable, provider-agnostic `ai/` Python package (talks to Claude / GPT-4o / Gemini), sample data, a `demo_ai.py` that exercises it end-to-end, and offline smoke tests. **You do not build the AI side.** You build the software-engineering wrapping around it: config, storage, concurrency, retries, validation, logging, CLI, HTTP API (where required), testing, Docker, README, and the final report.
-
-## What you submit on May 23
-
-The authoritative brief says the headline submission is **one ZIP archive** due before **May 23, 2026 at 23:59 (UTC+4)** containing:
-
-1. **Source code**.
-2. **Compiled report** (`report/report.pdf`) using `templates/REPORT_TEMPLATE.tex`.
-3. **Presentation deck** for the oral defense, using `templates/SLIDES_TEMPLATE.tex`.
-
-Per `SOFTWARE_PROJECT.pdf` §7 and §10, the report/email must also include the GitHub repository URL and final tag `v1.0-final`; the signed contribution statement is submitted with the final package.
-
-## Verify the provided AI module works
-
-Before you write a single line of SE code, every team member should be able to run:
+## Quick start (Docker)
 
 ```bash
-cd topic-N-<name>/
-python data/_make_samples.py            # if the topic uses generated samples
-python demo_ai.py --offline             # runs end-to-end without API keys
-pytest tests/test_ai_smoke.py -v        # provided contract tests, must pass
+git clone https://github.com/Gunas12/Food_Analyzer.git
+cd Food_Analyzer
+cp .env.example .env
+# fill in LLM_PROVIDER / API keys / USDA_API_KEY in .env
+
+docker compose up --build
 ```
 
-If any of these fail on your machine, fix the environment before continuing.
+This starts PostgreSQL and the API together. Open **http://localhost:8000**
+for the demo UI, or use the API directly (below).
 
-## Quick rules
+## Running without Docker
 
-- **Do not** edit any file under `ai/`. The smoke tests are a contract; they must keep passing.
-- **Do not** commit real API keys. Use `.env`; `.env` is in `.gitignore`; `.env.example` lists keys with empty values.
-- **Do not** modify the public interface of the AI module — automatic deduction.
-- **Do** read the **`SOFTWARE_PROJECT.pdf`** end-to-end before the kickoff meeting. The rubric is non-negotiable.
-- **Do** use the timeline in `docs/TIMELINE.md` to plan.
-- **Do** disclose AI-assistant use (Cursor / Claude / Copilot / etc.) in the report.
+```bash
+python -m venv .venv
+source .venv/bin/activate        # macOS / Linux
+# .venv\Scripts\Activate.ps1     # Windows PowerShell
 
-## Grading summary
+pip install -r requirements.txt
+cp .env.example .env
 
-100 points: **Code 60% · Report 25% · Presentation 15%.** Up to **+10 bonus points** for advanced features (`docs/ADVANCED_BONUSES.md`). Automatic deductions for hard-coded keys, broken Docker, network-dependent tests, severe commit imbalance, and modifying `ai/`.
+PYTHONPATH=. uvicorn src.api:app --reload --port 8000
+```
 
-Full rubric in **`SOFTWARE_PROJECT.pdf`** §8.
+### CLI (offline, no API keys needed)
+
+```bash
+python data/_make_samples.py
+PYTHONPATH=. python -m src.cli analyze data/rice_chicken_broccoli.png
+```
 
 ---
 
-**Questions?** Open an issue against the course-wide repo or email the instructor. Do not delay on a blocker.
+## API usage
 
-Good luck. Build something you would actually ship.
+### Health check
+
+```bash
+curl http://localhost:8000/health
+# {"status":"ok"}
+```
+
+### Analyze a meal photo
+
+```bash
+curl -X POST http://localhost:8000/analyze -F "file=@data/rice_chicken_broccoli.png"
+```
+
+```json
+{
+  "id": 6,
+  "created_at": "2026-09-18T09:47:52.747432Z",
+  "image_path": "/app/uploads/8328acf4af0144c1aa8e3b0f650b7ca9.png",
+  "meal_recognized": true,
+  "ingredients": [
+    {"name": "grilled beef patty", "estimated_grams": 150.0, "confidence": 0.8,
+     "kcal": 1860.0, "protein_g": 34.5, "carbs_g": 0.0, "fat_g": 32.7},
+    {"name": "white rice", "estimated_grams": 120.0, "confidence": 0.85,
+     "kcal": 430.8, "protein_g": 8.328, "carbs_g": 95.76, "fat_g": 1.56},
+    {"name": "steamed broccoli", "estimated_grams": 40.0, "confidence": 0.85,
+     "kcal": 648.0, "protein_g": 3.888, "carbs_g": 30.08, "fat_g": 2.072}
+  ],
+  "totals": {"kcal": 2938.8, "protein_g": 46.716, "carbs_g": 125.84, "fat_g": 36.332}
+}
+```
+
+### Fetch a past analysis
+
+```bash
+curl http://localhost:8000/analyses/1
+```
+
+```json
+{
+  "id": 1,
+  "created_at": "2026-09-15T11:10:02.563577Z",
+  "image_path": "/app/uploads/8cfee6f29d3c44bb89de0d9049e92156.png",
+  "meal_recognized": true,
+  "ingredients": [
+    {"name": "beef patty", "estimated_grams": 110.0, "confidence": 0.75,
+     "kcal": 1364.0, "protein_g": 25.3, "carbs_g": 0.0, "fat_g": 23.98},
+    {"name": "hard-boiled egg", "estimated_grams": 50.0, "confidence": 0.85,
+     "kcal": 77.5, "protein_g": 6.3, "carbs_g": 0.56, "fat_g": 5.3}
+  ],
+  "totals": {"kcal": 1441.5, "protein_g": 31.6, "carbs_g": 0.56, "fat_g": 29.28}
+}
+```
+
+404 is returned for an unknown id.
+
+---
+
+## Tests
+
+```bash
+PYTHONPATH=. pytest
+PYTHONPATH=. pytest tests/test_ai_smoke.py -v
+PYTHONPATH=. pytest --cov=src --cov-report=term-missing
+```
+
+All tests run offline (AI module and HTTP calls mocked). Latest results:
+
+- 143/143 tests passing
+- `src/` coverage: **97%** (`src/api.py` 89%, `src/cli.py` 98%, rest 100%)
+- `tests/test_ai_smoke.py` untouched, passing
+- `mypy src/` — 0 errors (one pre-existing warning in the provided `ai/providers/openai.py`)
+
+---
+
+## Docker
+
+```bash
+docker compose up --build   # start PostgreSQL + API
+docker compose down         # stop, keep data
+docker compose down -v      # stop and delete data
+```
+
+---
+
+## Project layout
+
+```
+Food_Analyzer/
+├── ai/                          # PROVIDED — not modified
+│   ├── providers/                # Anthropic, OpenAI, Gemini adapters
+│   ├── vlm.py                    # identify_ingredients()
+│   ├── nutrition.py               # NutritionProvider / USDAProvider
+│   ├── calculator.py              # compute_totals()
+│   └── schemas.py                 # Ingredient, NutritionFacts
+│
+├── src/
+│   ├── config.py                  # typed Settings via pydantic-settings
+│   ├── models.py                  # AnalysisRecord, IngredientLine, MealTotals
+│   ├── validation.py              # image format / size checks
+│   ├── wiring.py                  # composition root
+│   ├── cli.py                     # python -m src.cli analyze <path>
+│   ├── api.py                     # FastAPI: POST /analyze, GET /analyses/{id}, GET /health
+│   ├── core/analyzer.py           # pipeline: validate → VLM → nutrition → totals → save
+│   ├── services/
+│   │   ├── ai_service.py           # retry wrapper around ai.*
+│   │   └── nutrition_cache.py      # TTL cache (24h default)
+│   ├── concurrency/pipeline.py    # asyncio.gather + Semaphore for parallel lookups
+│   └── storage/repository.py      # SQLAlchemy async repository, PostgreSQL
+│
+├── tests/                        # 143 tests, all offline
+├── data/                          # sample meal images
+├── static/index.html              # demo UI
+├── scripts/bench.py                # sequential vs concurrent benchmark
+├── docker-compose.yml
+├── Dockerfile
+├── requirements.txt
+├── .env.example
+└── TOPIC.md
+```
+
+---
+
+## Architecture
+
+```
+Browser / curl
+      │
+      ▼
+FastAPI  src/api.py
+  ├── POST /analyze
+  │     ├── validation.py          → format/size checks
+  │     ├── AIService.identify_ingredients()   ← retry
+  │     │       └── ai.vlm.identify_ingredients()   (Gemini / Anthropic / OpenAI)
+  │     ├── NutritionPipeline.lookup()          ← asyncio.gather + Semaphore
+  │     │       ├── NutritionCache (TTL)
+  │     │       └── ai.nutrition.USDAProvider.lookup()
+  │     ├── ai.calculator.compute_totals()
+  │     └── repository.save()                    ← PostgreSQL
+  │
+  └── GET /analyses/{id}  → repository.get() → PostgreSQL
+```
+
+Full diagram and design rationale: [`docs/architecture.md`](docs/architecture.md).
+
+---
+
+## Sequential vs concurrent benchmark
+
+| Workload | N (ingredients) | Sequential | Concurrent (semaphore=10) | Speedup |
+|---|---|---|---|---|
+| Nutrition lookup, simulated 150 ms latency per call | 10 | 1.522 s | 0.168 s | **9.0×** |
+
+**Reproduce:**
+
+```bash
+python scripts/bench.py     # set PYTHONPATH=. first if running outside Docker
+```
+
+---
+
+## Environment variables
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `LLM_PROVIDER` | `gemini` | VLM provider (`anthropic` / `openai` / `gemini`) |
+| `LLM_MODEL` | — | Model id |
+| `GOOGLE_API_KEY` / `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` | — | key for the chosen provider |
+| `USDA_API_KEY` | — | USDA FoodData Central key |
+| `DATABASE_URL` | `postgresql+asyncpg://postgres:dev@localhost:5432/foodanalyzer` | PostgreSQL connection |
+| `NUTRITION_CACHE_TTL_SECONDS` | `86400` | Cache TTL |
+| `MAX_IMAGE_SIZE_MB` | `5` | Upload size limit |
+| `MAX_PARALLEL` | `10` | Semaphore bound for nutrition lookups |
+| `HTTP_PORT` | `8000` | API port |
+| `LOG_LEVEL` | `INFO` | `DEBUG` / `INFO` / `WARNING` / `ERROR` |
+
+Full list: `.env.example`.
+
+---
+
+## SE layer — what we built
+
+| Requirement | Implementation |
+|---|---|
+| Typed config | `pydantic-settings` `Settings`, `get_settings()` |
+| Image validation | MIME/suffix check, size limit, safe filename (UUID) |
+| Structured logging | `logging` module |
+| Retries | `AIService` — 3 attempts, exponential backoff |
+| Cache | `NutritionCache` — in-memory TTL cache |
+| Concurrency | `asyncio.gather` + `Semaphore` — `src/concurrency/pipeline.py` |
+| Storage | PostgreSQL, `src/storage/repository.py` |
+| HTTP API | FastAPI `POST /analyze`, `GET /analyses/{id}`, `GET /health` |
+| CLI | `python -m src.cli analyze <path>` |
+| Tests | 143 tests, offline, `pytest-asyncio` |
+| Docker | `docker-compose.yml` (PostgreSQL + API) + `Dockerfile` |
+| Demo UI | `static/index.html` |
+
+---
+
+## Git workflow
+
+- `main` is protected — all changes go through Pull Requests
+- Every PR requires at least one teammate's review
+- Final release tag: `v1.0-final`
+
+---
+
+## Team
+
+| # | Member | GitHub | Focus |
+|---|---|---|---|
+| 1 | Gunash Mammadova | [@Gunas12](https://github.com/Gunas12) | Config, models, wiring, CLI, Docker, final integration |
+| 2 | Punhan Murselov | [@Punhan0](https://github.com/Punhan0) | Storage (repository, PostgreSQL) |
+| 3 | Ali Muradov | [@Ali-Muradov](https://github.com/Ali-Muradov) | AIService (retry), NutritionCache, concurrency pipeline |
+| 4 | Esmira Mammadli | [@EsmiraMammadli](https://github.com/EsmiraMammadli) | FastAPI endpoints, static demo UI |
+
+Per-member file/PR ownership: [`report/CONTRIBUTION_STATEMENT.md`](report/CONTRIBUTION_STATEMENT.md).
+AI tool disclosure: `report/report.pdf` §10 and [`report/CONTRIBUTION_STATEMENT.md`](report/CONTRIBUTION_STATEMENT.md).
+
+## License
+
+Academic coursework, not a published library.
