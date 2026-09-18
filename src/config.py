@@ -1,6 +1,7 @@
 """Application settings loaded from environment variables."""
 from __future__ import annotations
 
+import logging
 from functools import lru_cache
 from typing import TYPE_CHECKING, Literal
 
@@ -65,3 +66,19 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     """Cached settings instance (reload in tests via get_settings.cache_clear())."""
     return Settings()
+
+
+def configure_logging(settings: Settings | None = None) -> None:
+    """Configure the root logger's level from ``Settings.log_level``.
+
+    Call this once, as early as possible, from every process entry point
+    (the API's module-level setup and the CLI's ``main()``). Until this
+    runs, the ``log_level`` setting has no effect on anything — modules
+    only call ``logging.getLogger(__name__)``, which defers to the root
+    logger's configuration.
+    """
+    settings = settings or get_settings()
+    logging.basicConfig(
+        level=settings.log_level,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    )

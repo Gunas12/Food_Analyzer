@@ -33,12 +33,14 @@ from ai import NutritionProvider, get_nutrition_provider
 from ai.providers.base import ProviderError, VLMProvider
 
 from src.concurrency import NutritionPipeline
-from src.config import get_settings
+from src.config import configure_logging, get_settings
 from src.core.lines import build_ingredient_lines
 from src.models import AnalysisRecord, MealTotals
 from src.services import AIService, NutritionCache
 from src.storage.repository import Repository
+from src.validation import has_image_magic_bytes
 
+configure_logging()
 logger = logging.getLogger(__name__)
 
 _ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png"}
@@ -83,6 +85,13 @@ async def _validate_and_save_image(
         raise HTTPException(
             status_code=400,
             detail=f"File exceeds the {max_size_mb} MB limit.",
+        )
+    if not has_image_magic_bytes(contents[:16]):
+        # Content-Type is client-supplied and easy to spoof; the magic
+        # bytes are the same check the CLI path already relies on.
+        raise HTTPException(
+            status_code=400,
+            detail="File content does not look like a JPEG or PNG.",
         )
 
     path = _safe_upload_path(upload_dir, file.filename or "")
@@ -185,7 +194,7 @@ def create_app(
         )
         facts_by_name = await pipeline.lookup(ingredients)
         lines, totals = build_ingredient_lines(ingredients, facts_by_name)
-        
+
         try:
             record = AnalysisRecord(
                 image_path=str(image_path),
