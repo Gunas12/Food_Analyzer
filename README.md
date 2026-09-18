@@ -11,7 +11,7 @@
 
 ## Live demo
 
-🔗 **[https://food-analyzer-tx9l.onrender.com/](https://food-analyzer-tx9l.onrender.com/)** — web UI, deployed on [Render](https://render.com/) (Gunash / `@Gunas12`)
+🔗 **[https://food-analyzer-tx9l.onrender.com/](https://food-analyzer-tx9l.onrender.com/)** — web UI, deployed on [Render](https://render.com/) 
 
 - Web UI: https://food-analyzer-tx9l.onrender.com/
 - Interactive API docs (Swagger UI): https://food-analyzer-tx9l.onrender.com/docs
