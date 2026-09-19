@@ -13,7 +13,7 @@ import argparse
 import asyncio
 import sys
 
-from src.config import get_settings
+from src.config import configure_logging, get_settings
 from src.core.analyzer import FoodAnalyzer
 from src.models import AnalysisRecord
 from src.validation import ValidationError
@@ -44,6 +44,7 @@ def _render(record: AnalysisRecord) -> str:
 
 async def _run_analyze(image_path: str) -> int:
     settings = get_settings()
+    configure_logging(settings)
     components = build_components(settings)
     await components.repository.init_models()
 

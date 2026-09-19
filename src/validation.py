@@ -19,6 +19,17 @@ _JPEG_MAGIC = b"\xff\xd8\xff"
 _PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
 
 
+def has_image_magic_bytes(head: bytes) -> bool:
+    """True if `head` (the first bytes of a file) is a real JPEG or PNG.
+
+    Shared by this module (CLI path validation) and `src.api`
+    (multipart upload validation) so both entry points reject a
+    mislabeled or spoofed file the same way, not just by extension
+    or client-supplied Content-Type.
+    """
+    return head.startswith(_JPEG_MAGIC) or head.startswith(_PNG_MAGIC)
+
+
 class ValidationError(Exception):
     """Raised for any invalid image input. Plain exception — no framework
     dependency, so both the CLI and (if it chooses to) the API can catch it
@@ -54,7 +65,7 @@ def validate_image_path(path: str, *, max_size_mb: float) -> Path:
 
     with p.open("rb") as fh:
         head = fh.read(16)
-    if not (head.startswith(_JPEG_MAGIC) or head.startswith(_PNG_MAGIC)):
+    if not has_image_magic_bytes(head):
         raise ValidationError(
             "file content does not look like a JPEG or PNG (magic-byte check failed)"
         )
