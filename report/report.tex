@@ -1,0 +1,1392 @@
+% =====================================================================
+% AI Academy -- National AI Center
+% Software Engineering Final Project -- Team Report Template
+%
+% HOW TO USE
+% ----------
+%   1. Edit the CONFIGURATION block below (team name, topic, members).
+%   2. Replace every [TODO: ...] with your content. TODOs render in red,
+%      so anything you forgot will be visually obvious in the PDF.
+%   3. Three kinds of cues throughout:
+%        - REQUIRED DELIVERABLE box (blue): exactly what we expect.
+%        - PROBING QUESTIONS box (amber): NOT a checklist; these are
+%          prompts that should shape how you write the section. A strong
+%          response engages with at least 2 of them; a weak response
+%          ignores them all.
+%        - "Your response:" placeholders: replace with your text/diagram.
+%   4. Target length: 8-10 pages including figures, excluding bibliography.
+%   5. Compile with pdfLaTeX. Overleaf works out of the box.
+% =====================================================================
+
+\documentclass[11pt,a4paper]{article}
+
+% ===== EARLY MACROS (must come before configuration) =================
+% (Full styling lower down; we just need \TODO and \ph available
+% before the configuration block uses them.)
+\usepackage[dvipsnames]{xcolor}
+\definecolor{accent2}{HTML}{8B0000}
+\definecolor{ph}{HTML}{6B7280}
+\newcommand{\TODO}[1]{\textcolor{accent2}{\textbf{[TODO: #1]}}}
+\newcommand{\phh}[1]{\textcolor{ph}{\textit{#1}}}
+
+% ===== CONFIGURATION (edit these) ====================================
+\newcommand{\teamname}{Team \#1}
+\newcommand{\topicchoice}{Topic 2 -- AI Food Analyzer}
+\newcommand{\member}[2]{\textbf{#1} (#2)}  % name, GitHub handle
+\newcommand{\reportdate}{19 September 2026}
+\newcommand{\repolink}{\url{https://github.com/Gunas12/Food_Analyzer}}
+
+% ===== course meta (rarely changes) ==================================
+\newcommand{\coursecode}{AI-ENG-110}
+\newcommand{\coursename}{Software Engineering}
+\newcommand{\institution}{AI Academy, National AI Center}
+\newcommand{\semester}{Spring 2026}
+
+% ===== PACKAGES ======================================================
+\usepackage[margin=2.0cm,headheight=15pt]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[final,protrusion=true,expansion=false]{microtype}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{ragged2e}
+\usepackage{enumitem}
+\usepackage[parfill]{parskip}
+\setlength{\parskip}{0.55em}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds}
+\usepackage[most]{tcolorbox}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage[hidelinks]{hyperref}
+
+\emergencystretch=3em
+\hbadness=10000
+\hfuzz=2pt
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=NavyBlue,
+  urlcolor=NavyBlue,
+  citecolor=NavyBlue,
+  pdftitle={\coursecode\ Final Project Report},
+  pdfauthor={\teamname}
+}
+
+% ===== STYLING =======================================================
+\definecolor{accent}{HTML}{0B3D91}
+\definecolor{soft}{HTML}{F2F4F8}
+\definecolor{deliver}{HTML}{E8F0FE}
+\definecolor{deliverframe}{HTML}{1A56DB}
+\definecolor{probe}{HTML}{FFF8E1}
+\definecolor{probeframe}{HTML}{B45309}
+\definecolor{ok}{HTML}{166534}
+
+\titleformat{\section}
+  {\Large\bfseries\color{accent}}{\thesection.}{0.6em}{}
+\titleformat{\subsection}
+  {\large\bfseries\color{accent}}{\thesubsection}{0.5em}{}
+
+\newcommand{\ans}[1]{\rule[-2pt]{#1}{0.5pt}}
+\let\ph\phh  % alias the early \phh as \ph for consistency with the body
+
+% ---------------------------------------------------------------------
+% GUIDANCE BOXES ON/OFF
+% The template's blue "Required" and amber "Probing questions" boxes are
+% instructions to us, not content. With them the PDF is 15 pages; the
+% brief asks for 8-10. \guidancefalse hides them (the text still answers
+% every one of them). Switch to \guidancetrue to see them again.
+% ---------------------------------------------------------------------
+\newif\ifguidance
+\guidancefalse
+
+% Deliverable callout (light blue)
+\newtcolorbox{deliverboxshown}{
+  colback=deliver, colframe=deliverframe, boxrule=0.5pt,
+  arc=2pt, left=8pt, right=8pt, top=4pt, bottom=4pt
+}
+% Probing-question callout (light amber)
+\newtcolorbox{probeboxshown}{
+  colback=probe, colframe=probeframe, boxrule=0.5pt,
+  arc=2pt, left=8pt, right=8pt, top=4pt, bottom=4pt
+}
+
+\ifguidance
+  \newenvironment{deliverbox}{\begin{deliverboxshown}}{\end{deliverboxshown}}
+  \newenvironment{probebox}{\begin{probeboxshown}}{\end{probeboxshown}}
+\else
+  \newenvironment{deliverbox}{\setbox0\vbox\bgroup}{\egroup\ignorespacesafterend}
+  \newenvironment{probebox}{\setbox0\vbox\bgroup}{\egroup\ignorespacesafterend}
+\fi
+
+\newcommand{\answerbox}[1]{%
+  \par\noindent
+  \fcolorbox{black!30}{soft}{%
+    \parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}{%
+      \vspace{0pt}\centering
+      \ph{[Your response here -- replace this placeholder.]}
+      \vspace{#1}
+    }%
+  }\par
+}
+
+\newcommand{\figureplaceholder}[1]{%
+  \par\noindent
+  \begin{center}
+  \fcolorbox{black!30}{soft}{%
+    \parbox{0.75\linewidth}{%
+      \vspace{0pt}\centering
+      \ph{[Replace this box with \texttt{\textbackslash includegraphics\{...\}} or a tikzpicture.]}
+      \vspace{#1}
+    }%
+  }
+  \end{center}
+}
+
+\definecolor{codegreen}{rgb}{0,0.55,0}
+\definecolor{codegray}{rgb}{0.4,0.4,0.4}
+\definecolor{codepurple}{rgb}{0.55,0,0.78}
+\definecolor{backcolour}{rgb}{0.97,0.97,0.97}
+
+\lstdefinestyle{python}{
+  language=Python,
+  backgroundcolor=\color{backcolour},
+  commentstyle=\color{codegreen},
+  keywordstyle=\color{accent},
+  numberstyle=\tiny\color{codegray},
+  stringstyle=\color{codepurple},
+  basicstyle=\ttfamily\footnotesize,
+  breakatwhitespace=false,
+  breaklines=true,
+  keepspaces=true,
+  numbers=left,
+  numbersep=6pt,
+  tabsize=2,
+  frame=single,
+  framerule=0.4pt,
+  rulecolor=\color{black!30},
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textit{\coursecode\ -- Final Report -- \teamname}}
+\fancyhead[R]{\small\textit{\semester}}
+\fancyfoot[L]{\small\textit{\institution}}
+\fancyfoot[R]{\small Page \thepage\ of \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% =====================================================================
+\begin{document}
+
+\begin{center}
+{\small \textsc{\institution} \\[0.2em] \textsc{\coursecode\ -- \coursename\ -- \semester}}\\[1.2em]
+{\Large\bfseries\color{accent} Final Project Report}\\[0.3em]
+{\LARGE\bfseries \topicchoice}\\[0.6em]
+\rule{0.85\textwidth}{0.6pt}
+\end{center}
+
+\vspace{0.6em}
+\begin{tabularx}{\textwidth}{@{}lXlX@{}}
+\textbf{Team:} & \teamname & \textbf{Date:} & \reportdate \\
+\textbf{Repo:} & \repolink & \textbf{Tag:} & \texttt{v1.0-final} \\
+\textbf{Members:} &
+\begin{tabular}[t]{@{}l l@{}}
+\member{Gunash Mammadova}{@Gunas12} &
+\member{Punhan Murselov}{@Punhan0} \\[0.2em]
+\member{Ali Muradov}{@Ali-Muradov} &
+\member{Esmira Mammadli}{@EsmiraMammadli}
+\end{tabular}
+& & \\
+\end{tabularx}
+\vspace{0.4em}\hrule\vspace{0.6em}
+
+% ===== EXECUTIVE SUMMARY =============================================
+\section*{Executive Summary}
+\addcontentsline{toc}{section}{Executive Summary}
+
+\begin{deliverbox}
+\textbf{Required.} Exactly one paragraph (5--7 sentences). What you built, the headline concurrency speedup you measured, your headline robustness story, and the single most surprising thing the team learned. \emph{This is the first thing the grader reads. If you cannot write it clearly, you do not yet understand your own project.}
+\end{deliverbox}
+
+\begin{probebox}
+\textit{Your paragraph should answer:} What problem did the system solve? What is the one number that proves the concurrency design works? What is the one failure mode you handled well? What would you change if you started over?
+\end{probebox}
+
+\par\noindent
+We built a Food Analyzer that turns one meal photo into a calorie and
+macronutrient breakdown: a vision-language model identifies ingredients with
+estimated portions, and the USDA FoodData Central API supplies the nutrition
+facts for each one. Our headline concurrency result is a \textbf{9.9$\times$}
+speedup on a 10-ingredient nutrition lookup (1.517\,s sequential vs.\
+0.154\,s concurrent, semaphore bound of 10), reproducible with
+\texttt{python scripts/bench.py}. Our headline robustness story is that a
+single ingredient's nutrition lookup can fail -- after its own retries are
+exhausted -- without failing the whole analysis: \texttt{NutritionPipeline}
+logs the miss and returns the meal with that one ingredient's macros at zero,
+rather than discarding the entire request. The most surprising thing the
+team learned while building this was how much of that robustness reduced to
+a small number of narrowly-scoped \texttt{except ProviderError} clauses at
+just two seams (the AI wrapper and the pipeline) rather than defensive
+checks scattered throughout the codebase -- centralizing retries in one
+\texttt{AIService} class turned out to be the single decision that made the
+rest of the error handling simple. If we started over we would add a
+per-call timeout (\texttt{asyncio.wait\_for}) inside \texttt{AIService}
+from the first commit rather than last: our retry policy bounds how many
+times a call can fail, but nothing bounds how long a single call may hang,
+so the one failure mode we cannot currently survive is a provider that
+accepts the connection and then never answers.
+
+% ===== TABLE OF CONTENTS =============================================
+\tableofcontents
+\vspace{0.6em}\hrule\vspace{0.4em}
+
+% =====================================================================
+\section{Project Overview}
+
+\subsection{Problem framing \& scope}
+
+\begin{deliverbox}
+\textbf{Required.} 2--3 paragraphs. State the topic problem in your own words. List the inputs, outputs, and any user-facing entry points (CLI commands, HTTP endpoints). State which provider stack you used (LLM, embedding, USDA, web search).
+\end{deliverbox}
+
+\begin{probebox}
+\textit{Beyond the obvious:} which parts of the TOPIC.md spec did your team explicitly decide \emph{not} to do, and why? Where did you tighten the spec? Where did you loosen it?
+\end{probebox}
+
+\par\noindent
+The system takes one meal photo as input and returns a structured breakdown
+of its ingredients (name, estimated grams, confidence) together with
+calories and macronutrients (protein, carbohydrates, fat) per ingredient and
+as a meal total. It is exposed through two entry points that share the same
+pipeline: a CLI (\texttt{python -m src.cli analyze <path>}) for local,
+offline-friendly use, and an HTTP API (\texttt{POST /analyze},
+\texttt{GET~/analyses/\{id\}}, \texttt{GET~/health}) for the browser demo
+and for scripted access via \texttt{curl}. The provider stack is
+configurable via \texttt{LLM\_PROVIDER} (\texttt{gemini} by default, with
+\texttt{anthropic} and \texttt{openai} as drop-in alternatives, all through
+the provided \texttt{ai/} package) for vision-language ingredient
+identification, and the USDA FoodData Central API (\texttt{ai/nutrition.py})
+for per-ingredient nutrition facts.
+
+\par\noindent
+We tightened the spec in two places the brief left open: image validation
+checks magic bytes, not just the file extension or the client-supplied
+\texttt{Content-Type}, so a mislabeled or corrupted file is rejected before
+it ever reaches the VLM; and every uploaded image is written to disk under a
+server-generated UUID filename rather than a client-supplied one, closing an
+unrequested but obvious path-traversal risk. We loosened the spec, or left
+it partially done, in a few places we consider defensible trade-offs under a
+tight deadline rather than oversights: there is no \texttt{GET /analyses}
+list endpoint, even though the underlying \texttt{Repository.list\_recent()}
+method exists and is tested; there is no per-call timeout wrapping
+\texttt{AIService} calls, only the retry/backoff policy (Section
+\ref{sec:robustness} discusses this explicitly as a known gap rather than an
+oversight discovered at grading time); and there is no failover for the
+nutrition provider, only for the VLM.
+
+\par\noindent
+Two scope decisions came out of our own process rather than the brief. We
+deliberately spent the last day of a three-day sprint closing gaps we had
+found ourselves instead of starting an Advanced Bonus: \texttt{LOG\_LEVEL}
+was declared in \texttt{Settings} but never applied to the root logger, and
+the HTTP upload path trusted the client-supplied \texttt{Content-Type}
+while the CLI path already checked magic bytes. Both were fixed (PR \#25,
+\texttt{configure\_logging()} in \texttt{config.py} and the shared
+\texttt{has\_image\_magic\_bytes()} helper in \texttt{validation.py}), and
+we judged that closing a real inconsistency between our two entry points
+was worth more than adding a feature neither entry point would have shared.
+The second decision was to keep a single database table: a normalized
+\texttt{ingredients} child table was discussed and rejected (Section
+\ref{sec:storage}), because nothing in this topic ever queries one
+ingredient across analyses.
+
+\subsection{Provider choice and the AI module contract}
+
+\begin{deliverbox}
+\textbf{Required.} Name the LLM, embedding, and any auxiliary provider you used, and the model identifiers (\texttt{claude-sonnet-4-6}, \texttt{text-embedding-3-small}, etc.). State what \texttt{ai/} functions you call. \emph{Confirm in one sentence that you did not modify the public interface of the provided \texttt{ai/} package.}
+\end{deliverbox}
+
+\begin{probebox}
+\textit{Push deeper:} how does your code defend against a malformed model response? What happens when the provider returns valid JSON that is semantically wrong (wrong topic enum, negative grams, etc.)?
+\end{probebox}
+
+\par\noindent
+By default the system uses \texttt{LLM\_PROVIDER=gemini} with
+\texttt{LLM\_MODEL=gemini-2.0-flash} for ingredient identification, with
+\texttt{anthropic} and \texttt{openai} available as configuration-only
+swaps through the same \texttt{ai.identify\_ingredients()} entry point.
+Nutrition facts come from \texttt{NUTRITION\_PROVIDER=usda}, via
+\texttt{ai.get\_nutrition\_provider()} and \texttt{USDAProvider.lookup()}.
+We call exactly three functions from the provided package:
+\texttt{ai.identify\_ingredients()}, \texttt{ai.get\_nutrition\_provider()}
+/ \texttt{NutritionProvider.lookup()}, and \texttt{ai.compute\_totals()}. We
+confirm that the public interface of \texttt{ai/} was never modified --
+\texttt{git log --oneline -- ai/} shows the package touched only in the
+commit that introduced it.
+
+\par\noindent
+The provided package already validates the model response's \emph{shape}:
+\texttt{ai/schemas.py}'s Pydantic models reject a negative
+\texttt{estimated\_grams}, an out-of-range \texttt{confidence}, or a missing
+required field before the response ever reaches our code (the provided
+\texttt{tests/test\_ai\_smoke.py} exercises exactly this, and we do not
+weaken it). Our own layer adds two further defenses at the boundary: any
+provider-side failure (malformed JSON, a 5xx, a timeout inside the USDA
+client) is raised as a single \texttt{ProviderError} type that
+\texttt{AIService} retries up to three times with exponential backoff before
+giving up, and our own \texttt{IngredientLine}/\texttt{MealTotals} models
+(\texttt{extra="forbid"}) reject any response shape that doesn't match
+exactly what we expect to persist, rather than silently accepting and
+storing unexpected extra fields.
+
+% =====================================================================
+\section{Architecture}\label{sec:arch}
+
+\subsection{Module map}
+
+\begin{deliverbox}
+\textbf{Required.} An architecture diagram (boxes-and-arrows or sequence diagram) showing the main modules and their dependencies. Identify on the diagram: the boundary of the provided \texttt{ai/} package, your service layer that wraps it, your core business logic, your concurrency layer, your storage layer, and your CLI/HTTP entry points.
+\end{deliverbox}
+
+\begin{probebox}
+\textit{Interpret your own diagram:} which arrows cross the AI-module boundary? Which arrows cross the storage boundary? If you had to swap providers (Anthropic $\to$ OpenAI), how many files would change?
+\end{probebox}
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\footnotesize, scale=0.98, every node/.style={transform shape},
+  box/.style={draw,rounded corners=2pt,minimum width=3.3cm,minimum height=0.8cm,align=center},
+  entry/.style={box,fill=green!8,draw=ok,thick},
+  sebox/.style={box,fill=accent!8,draw=accent},
+  aibox/.style={box,fill=soft,draw=accent,very thick,minimum width=8.2cm},
+  db/.style={box,fill=black!5,draw=black!50},
+  arrow/.style={-Stealth,semithick},
+  cross/.style={-Stealth,very thick,draw=accent}
+]
+  \node[entry] (cli) at (0,0)   {CLI --- \texttt{cli.py}\\\scriptsize\texttt{python -m foodanalyzer analyze}};
+  \node[entry] (api) at (5.4,0) {HTTP API --- \texttt{api.py}\\\scriptsize\texttt{POST /analyze}};
+
+  \node[sebox] (val)   at (-4.6,-1.6) {\texttt{validation.py}\\\scriptsize extension, size, magic bytes};
+  \node[sebox] (core)  at (0,-1.6)    {\texttt{core/analyzer.py}\\\scriptsize FoodAnalyzer (CLI path)};
+  \node[sebox] (lines) at (5.4,-1.6)  {\texttt{core/lines.py}\\\scriptsize shared response shaping};
+
+  \node[sebox] (repo) at (-4.6,-3.2) {\texttt{storage/repository.py}};
+  \node[sebox] (svc)  at (0.65,-3.2)    {\texttt{services/ai\_service.py}\\\scriptsize 3 attempts, backoff};
+  \node[sebox] (pipe) at (5.4,-3.2)  {\texttt{concurrency/pipeline.py}\\\scriptsize gather + Semaphore(10)};
+
+  \node[db]    (pg)    at (-4.6,-4.8) {PostgreSQL\\\scriptsize\texttt{analysis\_records}};
+  \node[sebox] (cache) at (5.4,-4.8)  {\texttt{nutrition\_cache.py}\\\scriptsize TTL 24h, lock};
+
+  \node[aibox] (ai) at (0.4,-6.4) {\textbf{provided \texttt{ai/} --- never modified}\\\scriptsize identify\_ingredients \ \textbullet\ \ NutritionProvider.lookup \ \textbullet\ \ compute\_totals};
+
+  \draw[arrow] (cli) -- (core);
+  \draw[arrow] (api) -- (lines);
+  \draw[arrow] (core) -- (lines);
+  \draw[arrow] (core) -- (val);
+  \draw[arrow] (5.4,-0.4) -- (5.4,-0.85) -- (-4.6,-0.85) -- (val.north);
+  \draw[arrow] (core) -- (svc);
+  \draw[arrow] (lines) -- (pipe);
+  \draw[arrow] (pipe) -- (svc);
+  \draw[arrow] (pipe) -- (cache);
+  \draw[cross] (svc) -- node[right,font=\scriptsize] {AI boundary} (ai);
+  \draw[cross] (lines.east) -- (7.6,-1.6) -- (7.6,-6.4) -- node[above,pos=0.55,font=\scriptsize] {totals} (ai.east);
+  \draw[arrow] (-1.3,-2.0) -- (-1.3,-3.2) -- (repo.east);
+  \node[font=\scriptsize] at (-2.1,-2.65) {save / get};
+  \draw[arrow] (7.3,0.4) -- (7.3,0.95) -- (-7.6,0.95) -- (-7.6,-3.2) -- (repo.west);
+  \draw[arrow] (repo) -- (pg);
+\end{tikzpicture}
+\end{center}
+
+\begin{center}
+\phh{Green = entry points; blue = our SE layer (\texttt{src/}); heavy blue box = the
+provided \texttt{ai/} package. Only the heavy arrows cross the AI boundary.}
+\end{center}
+
+\textbf{Module-by-module summary (1--2 sentences each):}
+
+\begin{itemize}[leftmargin=1.4em,itemsep=1pt]
+  \item \texttt{config.py} -- typed \texttt{Settings} (pydantic-settings), one cached \texttt{get\_settings()} instance for the whole process; also owns \texttt{configure\_logging()}, called once from each entry point to apply \texttt{LOG\_LEVEL} to the root logger.
+  \item \texttt{validation.py} -- CLI-side image validation (existence, extension, size, magic bytes), plus \texttt{has\_image\_magic\_bytes()}, which \texttt{api.py} imports so the upload path rejects a spoofed \texttt{Content-Type} by exactly the same rule as the CLI rather than by a second, drifting copy of it.
+  \item \texttt{wiring.py} -- composition root; builds \texttt{Repository} + \texttt{AIService} + \texttt{NutritionPipeline} from \texttt{Settings} for the CLI (the API builds an equivalent graph itself inside \texttt{create\_app()}).
+  \item \texttt{core/analyzer.py} -- \texttt{FoodAnalyzer}, the one place the full pipeline (validate $\to$ identify $\to$ parallel nutrition lookup $\to$ totals $\to$ persist) is expressed as a single method for the CLI.
+  \item \texttt{core/lines.py} -- \texttt{build\_ingredient\_lines()}, the shared seam between the CLI and the API: turns raw \texttt{Ingredient}/\texttt{NutritionFacts} into our own \texttt{IngredientLine}/\texttt{MealTotals}, so this specific piece of business logic (including the "missing lookup $\to$ zeroed macros, not a dropped ingredient" rule) cannot silently drift between the two entry points even though the surrounding orchestration is still written twice.
+  \item \texttt{services/ai\_service.py} -- \texttt{AIService}, retries any \texttt{ai.*} call up to 3 times with exponential backoff on \texttt{ProviderError}.
+  \item \texttt{services/nutrition\_cache.py} -- \texttt{NutritionCache}, a lock-protected, TTL-based in-memory cache keyed by normalized ingredient name.
+  \item \texttt{concurrency/pipeline.py} -- \texttt{NutritionPipeline}, bounds concurrent nutrition lookups with \texttt{asyncio.Semaphore(MAX\_PARALLEL)} and consults the cache before every network call.
+  \item \texttt{storage/repository.py} -- \texttt{Repository}, the only module that imports SQLAlchemy; everything else depends on its method signatures, not on the ORM.
+  \item \texttt{api.py} / \texttt{cli.py} -- the two entry points; both validate, call the AI layer through \texttt{AIService}/
+  \texttt{NutritionPipeline}, build the response through the shared \texttt{build\_ingredient\_lines()}, and persist -- but the five-step orchestration itself is still written once per entry point rather than both calling \texttt{FoodAnalyzer} (see Limitations).
+\end{itemize}
+
+\par\noindent
+Only two arrows cross the \texttt{ai/} boundary -- \texttt{AIService} calling
+\texttt{ai.identify\_ingredients()} and \texttt{NutritionPipeline} (via
+\texttt{AIService}) calling a \texttt{NutritionProvider} -- which is exactly
+why swapping \texttt{LLM\_PROVIDER} from \texttt{gemini} to
+\texttt{anthropic} changes zero files in \texttt{src/}: it is a single
+environment variable, since every provider implements the same
+\texttt{VLMProvider} contract defined in the provided \texttt{ai/} package.
+Only one arrow crosses the storage boundary -- \texttt{Repository.save()} /
+\texttt{.get()} -- which is why both \texttt{tests/test\_repository.py} and
+production code can point that one seam at either a live PostgreSQL
+instance or an in-memory SQLite database without touching any other module.
+
+\subsection{OOP design \& key abstractions}
+
+\begin{deliverbox}
+\textbf{Required.} Identify at least one example of inheritance or composition \emph{in your own code} (not the provided package's). Quote 5--10 lines of the relevant class or object design. Justify why this abstraction was the right tool; if you used an ABC, explain why.
+\end{deliverbox}
+
+\begin{probebox}
+\textit{Defensibility:} if a grader asked "why is this an abstract base class rather than a Protocol, a plain function with a callable parameter, or a configuration enum?" --- what is your answer? Are there places where you used composition where inheritance would have been wrong, or vice versa?
+\end{probebox}
+
+\textbf{Code listing (composition, \texttt{src/core/analyzer.py}):}
+\begin{lstlisting}[style=python]
+class FoodAnalyzer:
+    def __init__(
+        self,
+        ai_service: AIService,
+        pipeline,  # NutritionPipeline
+        repository: Repository,
+        *,
+        max_image_size_mb: float = 5.0,
+    ) -> None:
+        self._ai_service = ai_service
+        self._pipeline = pipeline
+        self._repository = repository
+        self._max_image_size_mb = max_image_size_mb
+
+    async def analyze(self, image_path: str) -> AnalysisRecord:
+        ...  # validate -> identify -> parallel lookup -> totals -> save
+\end{lstlisting}
+
+\textbf{Justification:} \texttt{FoodAnalyzer} composes three collaborators
+(\texttt{AIService}, \texttt{NutritionPipeline}, \texttt{Repository}) rather
+than inheriting from a base pipeline class, because the four pipeline stages
+are heterogeneous operations (an AI call, a fan-out over a network provider,
+a database write) with no shared method signature an abstract base class
+could usefully capture -- there is nothing to override, only things to
+call in sequence. Composition also makes every collaborator independently
+mockable in \texttt{tests/test\_analyzer.py} without a test double having to
+satisfy an inheritance contract, which is the same reason
+\texttt{src/storage/repository.py}'s \texttt{Repository} class wraps
+SQLAlchemy behind three plain methods (\texttt{save}/\texttt{get}/\texttt{
+list\_recent}) instead of subclassing a SQLAlchemy base: nothing else in the
+codebase needs to be an ORM model, it only needs to call those three
+methods. We did use inheritance once, indirectly, by depending on the
+provided \texttt{ai/providers/base.py}'s \texttt{VLMProvider} ABC when
+injecting a fake provider in tests (\texttt{ScriptedVLM(VLMProvider)}) --
+there, unlike in our own code, an ABC is the right tool because every
+provider genuinely shares one call signature (\texttt{describe(...)}) that
+callers dispatch through polymorphically.
+
+\subsection{Data flow across module boundaries}
+
+\begin{deliverbox}
+\textbf{Required.} List the dataclasses you defined for your own SE layer. Confirm in one sentence that no naked dictionaries cross module boundaries.
+\end{deliverbox}
+
+\begin{probebox}
+\textit{The hardest call:} when did you reuse a dataclass from the provided \texttt{ai/} package vs.\ wrap it in a new one for your SE layer? What was the trigger for wrapping?
+\end{probebox}
+
+\par\noindent
+Our SE layer defines four Pydantic models in \texttt{src/models.py}:
+\texttt{IngredientLine} (one ingredient enriched with computed nutrition),
+\texttt{MealTotals} (summed macros), \texttt{AnalysisResult} (what a fresh
+analysis returns), and \texttt{AnalysisRecord} (the persisted row, with
+optional \texttt{id}/\texttt{created\_at}). All four set
+\texttt{model\_config = ConfigDict(extra="forbid")}, and every function
+signature between \texttt{core/analyzer.py}, \texttt{api.py}, and
+\texttt{storage/repository.py} is typed with these models or the provided
+\texttt{ai.schemas} models -- no naked dictionary crosses a module boundary
+anywhere in \texttt{src/}.
+
+\par\noindent
+The trigger for wrapping rather than reusing directly was persistence and
+API-shape stability: we pass the provided \texttt{ai.schemas.Ingredient} and
+\texttt{NutritionFacts} straight through \emph{inside} the pipeline (they
+never touch the database), but the moment a value is about to leave our
+layer -- returned from the HTTP API or written to PostgreSQL -- we convert
+it into our own model. That boundary lets \texttt{IngredientLine} carry
+fields the provided \texttt{Ingredient} does not have (computed
+\texttt{kcal}/\texttt{protein\_g}/\texttt{carbs\_g}/\texttt{fat\_g} for this
+ingredient's portion) without touching \texttt{ai/}, and lets our storage
+schema evolve independently of whatever the provided package's schema does.
+
+% =====================================================================
+\section{Concurrency \& Performance}\label{sec:concurrency}
+
+\subsection{Why this concurrency model}
+
+\begin{deliverbox}
+\textbf{Required.} State which concurrency primitive you used (\texttt{asyncio}, \texttt{ProcessPoolExecutor}, \texttt{ThreadPoolExecutor}) and why. Identify the bottleneck the parallel design targets. State the bound (e.g.\ \texttt{Semaphore(10)}) and how you picked it.
+\end{deliverbox}
+
+\begin{probebox}
+\textit{Justify against alternatives:} could you have used threads instead of asyncio? Why not? What is the smallest workload at which the concurrent design starts to win against sequential? What happens if you set the semaphore to 1 vs.\ 100?
+\end{probebox}
+
+\par\noindent
+We use \texttt{asyncio.gather} bounded by \texttt{asyncio.Semaphore(
+MAX\_PARALLEL)} (default 10, configurable via \texttt{.env}) in
+\texttt{NutritionPipeline.lookup()}. The bottleneck this targets is
+network I/O wait: every ingredient's nutrition lookup is dominated by round
+trip time to the USDA API (or, in the VLM step, to the configured LLM
+provider), not by CPU work, so the event loop can issue the next lookup the
+instant the current one starts waiting rather than blocking a whole OS
+thread on it. \texttt{AIService} additionally runs every blocking provider
+call through \texttt{asyncio.to\_thread}, so even a provider SDK with no
+async support of its own does not block the event loop while it's inside a
+retry. We picked 10 as the default bound because it matches the course
+brief's sample workload sizes (10--20 ingredients/items) closely enough that
+one batch clears in roughly one round trip, without picking a number large
+enough to look like we were ignoring provider rate limits.
+
+\par\noindent
+Threads (a \texttt{ThreadPoolExecutor}) would work about as well for this
+specific workload, since the work is I/O-bound rather than CPU-bound and
+the GIL is released during network waits either way; we chose
+\texttt{asyncio} because FastAPI's request handlers are already coroutines,
+so the nutrition pipeline composes into that world (\texttt{await
+pipeline.lookup(...)}) without a second concurrency model, and
+\texttt{ProcessPoolExecutor} was never in consideration since there is no
+CPU-bound work anywhere in this pipeline. The concurrent design starts
+winning as soon as there are 2 ingredients to look up (any $N > 1$ with a
+non-trivial round trip), since even two sequential HTTP calls take
+noticeably longer than two that overlap. At \texttt{semaphore=1} the
+pipeline is effectively sequential again -- lookups are still issued through
+\texttt{asyncio.gather}, but the semaphore serializes them one at a time, so
+the wall-clock time converges to the sequential baseline. At
+\texttt{semaphore=100} with our default 10-ingredient benchmark workload the
+result would not change at all, because the semaphore can never bind tighter
+than the number of distinct ingredients in a batch -- the two numbers only
+diverge on a meal with more than 100 ingredients, which is not a realistic
+input for this topic.
+
+\subsection{Sequential-vs-concurrent benchmark}
+
+\begin{deliverbox}
+\textbf{Required.} A table reporting wall-clock time for the same workload run sequentially vs.\ concurrently. State $N$ (number of requests), the machine, the python version, whether caches were cleared, and the command line. Reproduce the table also in your README.
+\end{deliverbox}
+
+\begin{probebox}
+\textit{Honest interpretation:} did you reach the theoretical $N\times$ speedup? If not, what was the new bottleneck (provider rate limit? GIL? network RTT? single-threaded DB writes?). What would push the curve further?
+\end{probebox}
+
+\begin{center}\small
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Run} & $N$ & \textbf{Worker threads} & \textbf{Sequential (s)} & \textbf{Concurrent (s)} & \textbf{Speedup} \\
+\midrule
+(a) Windows dev machine (8 cores)      & 10 & 12 (default) & 1.517 & 0.154 & 9.9$\times$ \\
+(b) 1-vCPU Linux container             & 10 & \phantom{0}5 (default) & 1.505 & 0.301 & 5.0$\times$ \\
+(c) same container, executor raised    & 10 & 16 (forced)  & 1.505 & 0.152 & 9.9$\times$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textit{Machine/version:} Windows, Python 3.13.15, run via
+\texttt{\$env:PYTHONPATH="."; python scripts/bench.py}. \texttt{scripts/
+bench.py} uses a fixed, simulated 150\,ms latency per lookup
+(\texttt{\_SlowFakeProvider}) rather than a live USDA call, so the result
+isolates the concurrency gain from \texttt{asyncio.gather} +
+\texttt{Semaphore(10)} from provider-side variance; there is no cache to
+clear since each run constructs a fresh \texttt{NutritionCache}.
+
+\textbf{Discussion.} At $N=10$ and \texttt{max\_parallel=10} every lookup
+fits in one batch, so the ceiling is close to $N\times$; run (a) reached
+9.9$\times$, the missing 1\% being event-loop scheduling, not any provider
+limit, since the benchmark never leaves the process.
+
+\par\noindent
+Re-running the identical command on a second machine is what made the
+result interesting. On a 1-vCPU container the same code gave only
+5.0$\times$ (run b), and the cause is not the semaphore. \texttt{AIService}
+executes each blocking provider call through \texttt{asyncio.to\_thread},
+which dispatches to the event loop's default \texttt{ThreadPoolExecutor},
+sized by CPython at \texttt{min(32, os.cpu\_count() + 4)}. With one core
+that is 5 threads, so five lookups run and the other five queue behind
+them: $1.5\,\text{s}/0.3\,\text{s} = 5\times$, exactly the thread count.
+Raising the executor to 16 workers on the same container restored
+9.9$\times$ (run c), which confirms the mechanism rather than merely
+suggesting it. The practical consequence is that
+\texttt{Semaphore(MAX\_PARALLEL)} is only the \emph{intended} bound:
+whenever \texttt{MAX\_PARALLEL} exceeds \texttt{cpu\_count + 4}, the real
+bound is the thread pool, and on a small cloud instance (Render's free
+tier included) a configured value of 10 quietly becomes 5. The fix is one
+line at startup --
+\texttt{loop.set\_default\_executor(ThreadPoolExecutor(max\_workers=settings.max\_parallel))}
+-- and we would rather report the finding than a number that does not
+transfer between machines.
+
+\par\noindent
+We did not re-run the benchmark against live USDA/Gemini backends, because
+a live run would measure the providers' own variance and rate limits
+rather than our concurrency design; we expect network RTT and USDA's
+per-key limit to become the binding constraints there, but we have not
+measured that and do not claim it.
+
+\subsection{Rate limit \& politeness}
+
+\begin{deliverbox}
+\textbf{Required.} State the rate-limit strategy (sleep-on-429, token bucket, leaky bucket, request budget). Document the configured budget. State the highest burst your test suite produces.
+\end{deliverbox}
+
+\begin{probebox}
+\textit{Failure-mode test:} have you actually observed a 429 from the provider during development, or is this strategy untested in anger? What does the log look like when the budget is hit?
+\end{probebox}
+
+\par\noindent
+We do not implement a dedicated token-bucket or sleep-on-429 strategy;
+politeness toward the provider comes from two mechanisms working together:
+the \texttt{Semaphore(MAX\_PARALLEL)} bound (default 10) caps how many
+nutrition lookups are in flight at once regardless of batch size, and
+\texttt{AIService}'s generic retry policy backs off on any transient
+failure without distinguishing rate limiting from other transient errors:
+3 attempts, and therefore two waits, 0.5\,s then 1\,s, on any
+\texttt{ProviderError} -- which is what both a 429 and a 5xx arrive as.
+The configured budget is thus at most \texttt{MAX\_PARALLEL} (10) in-flight
+nutrition calls and at most 3 provider calls per logical lookup. The
+highest burst our test suite produces is bounded by the same semaphore:
+\texttt{tests/test\_pipeline.py} parametrizes batches up to the configured
+\texttt{max\_parallel}, and every provider call in tests is mocked, so no
+test can trigger a live rate limit.
+
+\par\noindent
+To be explicit, because it matters for how much this section is worth: we
+have \emph{never observed a real 429} from Gemini or USDA during
+development. Our manual runs were single-image and well inside the free
+tiers, so the rate-limit strategy above is reasoned, not battle-tested. We
+did observe the neighbouring path -- a provider call failing repeatedly
+and being retried, backed off, and mapped to a 503 (Section
+\ref{sec:robustness}) -- and a 429 would travel exactly that path, but we
+are not claiming to have seen the status code itself. The honest weakness
+is that without parsing \texttt{Retry-After} we would back off for 1.5\,s
+total where a provider might be asking for 60.
+
+% =====================================================================
+\section{Robustness \& Error Handling}\label{sec:robustness}
+
+\subsection{Wrapping the AI module}
+
+\begin{deliverbox}
+\textbf{Required.} Describe your service-layer wrapper around \texttt{ai.*} calls: retries (which exceptions, how many attempts, backoff schedule), timeouts (per-call value), structured logging (what fields, at what level), input validation (what you check before calling, what you check on the response).
+\end{deliverbox}
+
+\begin{probebox}
+\textit{Pressure-test:} what happens if the provider returns a 500? A 429? A connection reset mid-stream? A perfectly-formed JSON that contradicts the schema? Walk through one of these end-to-end.
+\end{probebox}
+
+\par\noindent
+Every call to \texttt{ai.identify\_ingredients()} and every
+\texttt{NutritionProvider.lookup()} goes through
+\texttt{AIService.\_call\_with\_retry()}: it catches exactly
+\texttt{ai.providers.base.ProviderError} (never a bare \texttt{except:}),
+retries up to \texttt{max\_attempts=3} times with backoff starting at
+\texttt{base\_delay=0.5}s and doubling (so two waits, 0.5s then 1s, before
+the third and final attempt), and logs at \texttt{INFO} on every
+start/retry/success -- explicitly \emph{without} the exception payload,
+since a \texttt{ProviderError} can carry raw provider responses or partial
+API keys (\texttt{tests/test\_ai\_service.py::
+test\_logs\_record\_lifecycle\_without\_provider\_error\_payload} asserts
+this). We do not currently set a per-call timeout in \texttt{AIService}
+itself (Section~\ref{sec:limits}); the provided USDA client does set its
+own internal 10s timeout. Input is checked before the call (magic bytes,
+extension, size -- see the next subsection) and the response is checked
+after: the provided \texttt{ai/schemas.py} rejects a malformed shape before
+it reaches us, and \texttt{IngredientLine}/\texttt{MealTotals}
+(\texttt{extra="forbid"}) reject anything we don't expect to persist.
+
+\par\noindent
+Walking through a 500/429 end-to-end: the provider SDK (inside
+\texttt{ai/}) raises \texttt{ProviderError}; \texttt{AIService} catches it,
+logs \texttt{"Retrying \{operation\} after attempt N/3 in D seconds"},
+sleeps, and retries; if all 3 attempts fail, the original
+\texttt{ProviderError} propagates to \texttt{api.py}, which maps it to an
+HTTP \texttt{503} -- with a message that depends on \emph{which} call
+exhausted its retries: \texttt{\{"detail": "AI provider unavailable."\}}
+for a failed VLM identification, or \texttt{\{"detail": "Nutrition
+provider unavailable."\}} for a failed USDA lookup, so the client (and
+whoever is debugging) knows which half of the pipeline broke without
+reading a stack trace. This is not a hypothetical: the exact first payload,
+\texttt{artefacts/demo\_no\_meal.json}, is a live capture of this path from
+our own manual testing --
+\begin{lstlisting}[language=bash,numbers=none,basicstyle=\ttfamily\small]
+$ curl -X POST http://localhost:8000/analyze -F "file=@data/no_meal_blue.png"
+{"detail":"AI provider unavailable."}
+\end{lstlisting}
+-- no stack trace, no raw provider payload, reaches the caller. A
+connection reset mid-stream inside the provider SDK is indistinguishable
+from a 500 at our layer, since both surface as \texttt{ProviderError}; a
+perfectly-formed JSON that contradicts the schema (e.g.\ negative grams) is
+rejected one layer earlier, inside \texttt{ai/schemas.py}, before
+\texttt{AIService} ever sees a result to retry.
+
+\par\noindent
+\textbf{The exact trigger}, since ``we observed X'' is worth more than
+``the code should do X'': the capture comes from running the app against a
+Gemini endpoint it could not reach --- the provider raises
+\texttt{ProviderError} at the point where the client would otherwise talk
+to \texttt{generativelanguage.googleapis.com}. The same state is
+reproducible in one step by starting the API with no
+\texttt{GOOGLE\_API\_KEY} in the environment or \texttt{.env}, since
+\texttt{ai/providers/google.py} raises \texttt{ProviderError("GOOGLE\_API\_KEY
+(or LLM\_API\_KEY) is not set.")} before any network call. Both routes
+produce the same three-attempt sequence and the same 503; we re-ran it
+while writing this section and the server log was:
+\begin{lstlisting}[language=bash,numbers=none,basicstyle=\ttfamily\scriptsize]
+INFO:src.services.ai_service:Starting identify_ingredients (attempt 1/3)
+INFO:src.services.ai_service:Retrying identify_ingredients after attempt 1/3 in 0.500 seconds
+INFO:src.services.ai_service:Starting identify_ingredients (attempt 2/3)
+INFO:src.services.ai_service:Retrying identify_ingredients after attempt 2/3 in 1.000 seconds
+INFO:src.services.ai_service:Starting identify_ingredients (attempt 3/3)
+WARNING:src.api:vlm_call_failed: Gemini call failed: 403 Forbidden. {...}
+INFO:httpx:HTTP Request: POST /analyze "HTTP/1.1 503 Service Unavailable"
+\end{lstlisting}
+
+\par\noindent
+That last \texttt{WARNING} is worth stating precisely rather than
+glossing, because it qualifies the claim above. \texttt{AIService} never
+logs the exception payload; \texttt{api.py} logs it \emph{once}, at the
+point where it converts the exhausted \texttt{ProviderError} into a 503,
+because at that moment the operator has lost every other trace of what
+went wrong. Nothing of it reaches the client: the HTTP body is exactly
+\texttt{\{"detail":"AI provider unavailable."\}}. So the guarantee we
+actually provide is ``no provider payload crosses the network boundary,
+and none is written per-retry'' -- not ``no provider payload is ever
+written''. If the deployment's logs were untrusted we would redact that
+one line to the exception class name.
+
+\subsection{Failure-mode analysis (one concrete incident)}
+
+\begin{deliverbox}
+\textbf{Required.} Pick \emph{one} failure mode you actually exercised (provider 5xx, timeout, malformed response, network drop, disk full, corrupted image, USDA outage, etc.). Describe: (i) how you injected the failure, (ii) what the system did, (iii) what the user saw, (iv) what the logs showed.
+\end{deliverbox}
+
+\begin{probebox}
+\textit{Go beyond "graceful degradation worked":} what did you originally expect to happen vs.\ what actually happened? Did the test surface any design issue that you then fixed? Did the log give you enough to diagnose it without running the code again?
+\end{probebox}
+
+\par\noindent
+\textbf{Injected failure:} a three-ingredient meal (\texttt{white rice},
+\texttt{mystery sauce}, \texttt{grilled chicken}) run through
+\texttt{NutritionPipeline.lookup()} against a scripted provider that always
+raises \texttt{ProviderError} for \texttt{"mystery sauce"} (simulating a USDA
+outage/no-match for one item) and succeeds normally for the other two.
+
+\par\noindent
+\textbf{What the system did:} \texttt{AIService} retried the failing lookup
+3 times with backoff (0.05s, 0.1s in this run), then
+\texttt{NutritionPipeline.\_lookup\_one} caught the exhausted
+\texttt{ProviderError}, logged a \texttt{WARNING}, and returned
+\texttt{None} for that one ingredient -- while \texttt{asyncio.gather} let
+the other two lookups, which never touched the failing ingredient, complete
+independently. The batch did not fail as a whole.
+
+\par\noindent
+\textbf{What the log showed} (captured directly, INFO level, unedited):
+\begin{lstlisting}[language=bash,numbers=none,basicstyle=\ttfamily\scriptsize]
+INFO:src.services.ai_service:Starting nutrition_lookup (attempt 1/3)
+INFO:src.services.ai_service:Starting nutrition_lookup (attempt 2/3)
+INFO:src.services.ai_service:Retrying nutrition_lookup after attempt 2/3 in 0.100 seconds
+INFO:src.services.ai_service:Starting nutrition_lookup (attempt 3/3)
+WARNING:src.concurrency.pipeline:Nutrition lookup failed for ingredient 'mystery sauce'
+\end{lstlisting}
+
+\par\noindent
+\textbf{What the caller saw:} \texttt{white rice} $\to$ FOUND, \texttt{
+mystery sauce} $\to$ MISSING (its \texttt{IngredientLine} carries
+\texttt{kcal=0, protein\_g=0, carbs\_g=0, fat\_g=0} rather than being
+dropped from the response), \texttt{grilled chicken} $\to$ FOUND -- the meal
+total still reflects the two ingredients that did resolve. This matched
+what we expected going in: the design goal was exactly that one unresolved
+ingredient degrades that ingredient's numbers, not the whole request. The
+log line alone (\texttt{"Nutrition lookup failed for ingredient
+'mystery sauce'"}) is enough to know \emph{which} ingredient degraded
+without re-running anything, though it does not say \emph{why} the
+provider failed -- the underlying \texttt{ProviderError} message is
+deliberately not logged (Section~\ref{sec:robustness} above), which is the
+right trade-off for not leaking provider payloads but does mean a real
+outage investigation would need to reproduce the failure with logging
+temporarily turned up, or add a redacted error-class field to the warning.
+
+\par\noindent
+This scripted injection is the \emph{partial}-failure case (one ingredient
+out of three). Its live counterpart, the \emph{total} failure of the VLM
+half of the pipeline, is the capture described above: an unreachable
+provider, three retries, and a 503 with no payload leak. We chose to
+document the scripted one in detail because it is the more interesting
+design decision -- deciding that a partial nutrition failure must still
+return HTTP 200 with a degraded line is a choice, whereas returning 503
+when the VLM is simply gone is not.
+
+\subsection{Input validation}
+
+\begin{deliverbox}
+\textbf{Required.} For every entry point (CLI, HTTP, file, env), list the validation rules. State what error message the user gets when validation fails.
+\end{deliverbox}
+
+\begin{probebox}
+\textit{Adversarial:} could a malformed image kill your service? A 100\,MB JSON request? A query of 50,000 characters? A path that escapes your storage directory?
+\end{probebox}
+
+\par\noindent
+\textbf{CLI} (\texttt{validate\_image\_path}, checked in this order --
+first failure wins): file must exist (\texttt{"file not found: \{path\}"});
+extension must be \texttt{.jpg}/\texttt{.jpeg}/\texttt{.png}
+(\texttt{"unsupported file extension ...; allowed: [...]"}\,); size must be
+$\leq$ \texttt{MAX\_IMAGE\_SIZE\_MB} (\texttt{"file too large: X.X MB (max
+Y MB)"}\,) and $>0$ bytes (\texttt{"file is empty"}); and the first 16 bytes
+must match a real JPEG or PNG magic number (\texttt{"file content does not
+look like a JPEG or PNG"}\,), so a text file renamed to \texttt{.png} is
+still rejected. Any failure raises \texttt{ValidationError}, which
+\texttt{cli.py} prints to \texttt{stderr} and exits with code \texttt{2}.
+
+\par\noindent
+\textbf{HTTP} (\texttt{\_validate\_and\_save\_image} in \texttt{api.py}):
+\texttt{Content-Type} must be \texttt{image/jpeg} or \texttt{image/png}
+(400); the upload must be non-empty (400) and $\leq$
+\texttt{MAX\_IMAGE\_SIZE\_MB} (400); the on-disk filename is generated as a
+fresh UUID rather than taken from the client (\texttt{\_safe\_upload\_path}
+also asserts the resolved path still starts with the resolved upload
+directory before writing), so a filename like \texttt{"../../etc/passwd"}
+cannot write outside \texttt{uploads/} -- this defends the adversarial
+case above directly rather than by accident.
+
+\par\noindent
+\textbf{Env:} \texttt{Settings} is a typed \texttt{pydantic-settings} model;
+an out-of-range \texttt{postgres\_port}, a negative
+\texttt{nutrition\_cache\_ttl\_seconds}, or an \texttt{LLM\_PROVIDER} outside
+\texttt{\{anthropic, openai, gemini\}} fails at process startup with a
+Pydantic validation error, not at request time.
+
+\par\noindent
+On the specific adversarial cases: a malformed image cannot kill the
+service, since the magic-byte check rejects it before anything image-shaped
+happens to it; a 100\,MB request is rejected as soon as its size is known
+(400, before it is fully buffered against \texttt{MAX\_IMAGE\_SIZE\_MB}); we
+have no free-text query parameter that accepts arbitrary length in this
+topic (unlike Topics 3/4), so a 50{,}000-character string is not an
+applicable attack surface here; and a path-escaping filename is defended
+by the UUID-plus-resolved-path check described above.
+
+\par\noindent
+We did not want to leave that paragraph as reasoning about our own code,
+so we ran each case against a live app instance (\texttt{TestClient} over
+\texttt{create\_app()}, in-memory SQLite repository) and recorded the
+actual responses:
+
+\begin{center}\small
+\begin{tabular}{p{6.6cm}cp{6.0cm}}
+\toprule
+\textbf{Request} & \textbf{Status} & \textbf{Body} \\
+\midrule
+100\,MB PNG upload & 400 & \texttt{File exceeds the 5 MB limit.} \\
+\texttt{filename="../../etc/passwd.png"} & 503\footnotesize$^{*}$ & stored as \texttt{uploads/<uuid>.png}; no file created outside \texttt{uploads/} \\
+Text bytes sent as \texttt{image/png} & 400 & \texttt{File content does not look like a JPEG or PNG.} \\
+Zero-byte upload & 400 & \texttt{Uploaded file is empty.} \\
+Valid JPEG sent as \texttt{text/plain} & 400 & \texttt{Unsupported content type: 'text/plain'.} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+{\footnotesize$^{*}$ The traversal attempt is not rejected -- it is
+defused: the filename is discarded, the bytes are a valid PNG, so the
+request proceeds normally and only then fails at the VLM call (the run
+used an unreachable provider). The security-relevant assertion is the
+second half of that cell: the file landed under \texttt{uploads/} with a
+UUID name, and \texttt{../../etc/passwd.png} did not exist afterwards.}
+
+% =====================================================================
+\section{Storage \& Caching}\label{sec:storage}
+
+\subsection{Schema}
+
+\begin{deliverbox}
+\textbf{Required.} The SQLite schema for your domain tables. Include indices and foreign keys. State which fields are derived (cached) vs.\ source-of-truth.
+\end{deliverbox}
+
+\begin{probebox}
+\textit{Schema choices:} why did you store embedding bytes as a blob rather than serialized JSON, or vice versa? What happens to the DB if the embedding dimension changes (a different provider, a different model)?
+\end{probebox}
+
+We use PostgreSQL (not SQLite) as the source of truth, via a SQLAlchemy
+async engine (\texttt{src/storage/repository.py}); tests run the identical
+schema against \texttt{sqlite+aiosqlite:///:memory:} so the suite stays
+offline. Equivalent DDL for the one table, \texttt{analysis\_records}:
+\begin{lstlisting}[style=python,language=sql,numbers=none,basicstyle=\ttfamily\small]
+CREATE TABLE analysis_records (
+  id               SERIAL PRIMARY KEY,        -- autoincrement
+  created_at       TIMESTAMPTZ NOT NULL,      -- default set in Python, not SQL
+  image_path       TEXT NOT NULL,
+  meal_recognized  BOOLEAN NOT NULL DEFAULT TRUE,
+  ingredients      JSON NOT NULL,   -- list[IngredientLine], denormalized
+  totals           JSON NOT NULL   -- MealTotals, derived from ingredients
+);
+\end{lstlisting}
+There are no foreign keys or secondary indices -- this is a single-table
+history log with one access pattern (\texttt{list\_recent()} orders by
+\texttt{created\_at DESC, id DESC}), so we did not add an index beyond the
+primary key given the project's scale. \texttt{ingredients} and
+\texttt{totals} are derived/denormalized: both are recomputed from the VLM
+response and USDA lookups at analysis time and stored as JSON for fast
+reads, rather than normalized into a separate \texttt{ingredients} table --
+the source of truth for any individual value is the analysis run itself,
+not the row. One clarification on the defaults: \texttt{id} is a real
+autoincrement column, but \texttt{created\_at} and the JSON columns get
+their defaults from the SQLAlchemy model in Python rather than from SQL
+\texttt{DEFAULT} clauses, so a row inserted by anything other than our
+\texttt{Repository} would need to supply them.
+
+\par\noindent
+This topic has no embedding step, so the blob-versus-JSON question does not
+apply directly; the equivalent decision we did make is \textbf{JSON columns
+versus a normalized \texttt{ingredients} child table} with a foreign key
+back to \texttt{analysis\_records}. We chose JSON because of the access
+pattern: every read in the system fetches one complete analysis
+(\texttt{get(id)}) or the last $N$ analyses (\texttt{list\_recent()}), and
+nothing ever queries across ingredients -- there is no ``how many times has
+this user eaten rice'' feature, and inventing the join table for a query
+nobody makes would cost an extra round trip on every read plus insert
+ordering we would have to get right. The cost of that choice is explicit:
+the moment such a query is wanted, the data has to be migrated out of JSON,
+and PostgreSQL cannot enforce the shape of what we store -- the
+\texttt{extra="forbid"} Pydantic models are the only thing validating it,
+which is precisely why they exist. A schema change on our side
+(e.g.\ adding fibre to \texttt{IngredientLine}) also leaves old rows with
+the old shape, so a reader must tolerate both; today it does, because rows
+are only ever read back through the same model version that wrote them.
+
+\subsection{Caching policy}
+
+\begin{deliverbox}
+\textbf{Required.} What do you cache, how long, where, and how is the cache invalidated. Report cache hit rate from a demo run (a single number is fine).
+\end{deliverbox}
+
+\begin{probebox}
+\textit{Correctness vs.\ freshness:} which cached values can become stale (e.g.\ USDA nutrition for a renamed food, an LLM summary if the prompt changes)? How would you detect and evict them in production?
+\end{probebox}
+
+\par\noindent
+We cache USDA nutrition lookups only (not VLM identifications, which depend
+on the specific photo and are never repeated). \texttt{NutritionCache}
+(\texttt{src/services/nutrition\_cache.py}) is an in-memory,
+\texttt{threading.Lock}-protected dictionary keyed by
+\texttt{normalize\_ingredient\_name(name)} (stripped, case-folded), with a
+default TTL of \texttt{NUTRITION\_CACHE\_TTL\_SECONDS=86400} (24h) tracked
+per-entry via a monotonic clock; an expired entry is evicted lazily, on the
+next \texttt{get()} for that key, rather than by a background sweep. The
+lock exists because \texttt{AIService} runs each blocking provider call
+through \texttt{asyncio.to\_thread}, so concurrent nutrition lookups can
+genuinely touch the cache from different OS threads, not just interleaved
+coroutines. On a demo run of 5 meals sharing a common set of ingredients (15 ingredient
+lookups over 8 distinct ingredients) we measured a \textbf{46.7\% cache hit
+rate} -- 7 of 15 lookups served from cache, 8 real provider calls. It is
+reproducible in one command, with no API keys, via
+\texttt{scripts/cache\_demo.py}, which drives five meals through one shared
+\texttt{NutritionPipeline} against a provider that counts its own calls:
+\begin{lstlisting}[language=bash,numbers=none,basicstyle=\ttfamily\small]
+$ PYTHONPATH=. python scripts/cache_demo.py
+ingredient lookups          15
+provider calls               8
+cache hits                   7
+cache hit rate: 46.7%
+\end{lstlisting}
+Two distinct mechanisms produce that number and we keep them separate: the
+\texttt{NutritionCache} serves repeats \emph{across} meals, while
+\texttt{NutritionPipeline.lookup()} additionally collapses duplicate
+normalized names \emph{within} one batch before dispatching, so the same
+ingredient listed twice in one photo is one provider call even with the
+cache disabled.
+
+\par\noindent
+The cached value can go stale if USDA revises a food's nutrition data
+within the 24h window (rare, but not impossible for a database that is
+itself periodically updated), or if the VLM returns a different string for
+the same real ingredient across two photos (\texttt{"grilled chicken"} vs.\
+\texttt{"grilled chicken breast"}), which our exact-string-after-normalize
+key would treat as two different cache entries rather than detecting they
+are the same food. In production we would not change the TTL-based
+eviction itself, but would add a manual or admin-triggered
+\texttt{cache.clear()} keyed to a known USDA data-refresh schedule, and
+consider fuzzy-matching or synonym normalization for the second problem
+before it can be solved by caching policy alone.
+
+% =====================================================================
+\section{Testing}\label{sec:testing}
+
+\subsection{Strategy \& coverage}
+
+\begin{deliverbox}
+\textbf{Required.} Report the coverage number (\texttt{pytest --cov}). State how you mocked the AI module and the HTTP layer. Confirm the provided \texttt{tests/test\_ai\_smoke.py} still passes.
+\end{deliverbox}
+
+\begin{probebox}
+\textit{Quality vs.\ coverage:} which lines did you decide \emph{not} to cover, and why? Which mocks did you have to redesign mid-project because they were testing the wrong thing?
+\end{probebox}
+
+\begin{center}\small
+\begin{tabular}{lcc}
+\toprule
+\textbf{Suite} & \textbf{Tests} & \textbf{Result} \\
+\midrule
+Our own tests, 11 files (\texttt{--cov=src}) & 114 & pass, \textbf{97\%} coverage \\
+Provided \texttt{ai/} smoke tests (untouched) & \phantom{0}29 & pass \\
+\midrule
+\texttt{python -m pytest -q} (whole suite) & \textbf{143} & 143 passed \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\par\noindent
+Per-module breakdown (\texttt{pytest --cov=src --cov-report=term-missing},
+490 statements total, 17 missed, exact output archived in
+\texttt{artefacts/coverage.txt}): every module in \texttt{src/} is at 100\%
+except \texttt{api.py} (118 stmts, 15 missed, \textbf{87\%} -- lines 58, 65,
+83, 92, 140, 142, 156, 169--171, 185--187, 205--206), \texttt{cli.py} (42
+stmts, 1 missed, \textbf{98\%} -- line 82), and
+\texttt{storage/repository.py} (44 stmts, 1 missed, \textbf{98\%} -- line
+128). The AI module is mocked via a fake \texttt{VLMProvider} subclass
+(\texttt{ScriptedVLM}, returning or raising scripted outcomes in order)
+injected through \texttt{AIService}'s \texttt{vlm=} parameter, and a fake
+\texttt{NutritionProvider} for nutrition lookups -- no test imports a real
+provider SDK. The HTTP layer is exercised with FastAPI's
+\texttt{TestClient} against \texttt{create\_app()} built with an in-memory
+SQLite repository and fake AI/nutrition factories, so \texttt{tests/
+test\_api.py} never opens a socket or hits PostgreSQL. \texttt{tests/
+test\_ai\_smoke.py} (the 29 provided tests) is untouched and passes.
+
+\par\noindent
+The 17 uncovered statements are almost entirely defensive branches that are
+straightforward to reason about but awkward to trigger without a real ASGI
+server or a real terminal (e.g.\ the static-file-mount
+\texttt{if static\_dir.is\_dir()} guard, and a couple of \texttt{except}
+branches around provider construction at request
+time) -- we judged the risk/effort trade-off of covering them as low given
+the deadline.
+
+\par\noindent
+One mock did have to be redesigned mid-project. The first fake VLM returned
+a fixed list of ingredients on every call, which was fine for the happy
+path but useless for the thing we actually needed to prove: that attempt 2
+succeeds after attempt 1 raises. A mock that cannot distinguish call 1 from
+call 2 cannot test a retry policy at all -- it only tests that the wrapper
+does not crash. We replaced it with \texttt{ScriptedVLM}, which is handed a
+\emph{sequence} of outcomes (values or exceptions) and consumes one per
+call, and the same shape was then reused for the fake nutrition provider,
+which is what makes the partial-failure pipeline test in
+Section~\ref{sec:robustness} expressible. A second, smaller correction:
+\texttt{AIService} takes an injectable \texttt{sleep} callable, added once
+we noticed the retry tests were spending real wall-clock seconds sleeping
+through the production backoff schedule.
+
+\subsection{Notable tests}
+
+\begin{deliverbox}
+\textbf{Required.} Highlight at least three tests: (i) one happy-path end-to-end test, (ii) one concurrency test (e.g.\ that \texttt{asyncio.gather} behaves correctly when one task raises), (iii) one error-path test that surfaces a real bug you would otherwise have missed.
+\end{deliverbox}
+
+\begin{probebox}
+\textit{What didn't you test?} What is the test you wish you had time to write?
+\end{probebox}
+
+\begin{itemize}[leftmargin=1.4em,itemsep=3pt]
+  \item \textbf{Happy path:} \texttt{tests/test\_api.py::
+  test\_analyze\_happy\_path} -- POSTs a real sample image through
+  \texttt{create\_app()}'s in-memory stack and asserts the full response
+  shape (ingredients, totals, persisted \texttt{id}); mirrored at the
+  business-logic level by \texttt{tests/test\_analyzer.py::
+  test\_happy\_path\_recognized\_meal}.
+  \item \textbf{Concurrency:} \texttt{tests/test\_pipeline.py::
+  test\_provider\_failure\_preserves\_other\_results
+  \_and\_logs\_warning}
+  -- runs a batch where one ingredient's lookup raises, and asserts the
+  other ingredients' results are still returned via \texttt{asyncio.gather}
+  (this is the test behind the failure-mode walkthrough in
+  Section~\ref{sec:robustness}); \texttt{test\_max\_parallel\_bounds\_calls\_
+  across\_concurrent\_batches} additionally asserts the semaphore bound is
+  never exceeded, across parametrized limits.
+  \item \textbf{Error path (surfaced a real design question):}
+  \texttt{tests/test\_api.py::test\_analyze\_unknown
+\_ingredient\_still\_
+  returns\_ok} -- forced us to decide, and then assert, that a nutrition
+  lookup failure returns HTTP \texttt{200} with a degraded ingredient
+  line rather than a \texttt{503} for the whole request; without this test
+  it would have been easy to let a single missing ingredient fail the
+  entire analysis instead.
+\end{itemize}
+
+\par\noindent
+\textbf{What we did not test.} Three gaps, in the order we would close
+them. First, no test exercises a hung provider, because there is no
+timeout to exercise -- the test and the feature are the same missing piece
+(Section~\ref{sec:limits}); the test we would write first is a fake
+provider that blocks forever and an assertion that \texttt{/analyze}
+answers within $n$ seconds, which today would simply hang the suite.
+Second, nothing tests \emph{concurrent requests}: every concurrency test
+we have lives inside one request, fanning out over ingredients, so the
+interesting question -- what happens when ten clients each open a batch of
+ten lookups against one shared cache and one shared \texttt{AIService} --
+is unmeasured. Third, no test runs against a real PostgreSQL instance;
+the suite uses SQLite, which means a PostgreSQL-specific problem (JSON
+type handling, or a connection pool exhausted under load) would reach
+production untested. With another day, the concurrent-request test is the
+one we would write, because it is the scenario a grader is most likely to
+create by accident during the demo.
+
+% =====================================================================
+\section{Deployment \& Reproducibility}\label{sec:deploy}
+
+\subsection{Docker image}
+
+\begin{deliverbox}
+\textbf{Required.} The exact \texttt{docker build} and \texttt{docker run} commands. The image size. The Python version baked in. Note whether you use a single-stage or multi-stage build.
+\end{deliverbox}
+
+\begin{probebox}
+\textit{Engineering trade-offs:} did you ship an Alpine, slim, or full base image, and why? How does your image size compare to a fresh \texttt{python:3.12-slim} ($\sim$120\,MB)?
+\end{probebox}
+
+\par\noindent
+\begin{lstlisting}[language=bash,numbers=none]
+$ docker compose up --build   # builds the API image and starts it with
+PostgreSQL
+$ docker build -t food-analyzer .
+$ docker run -p 8000:8000 --env-file .env food-analyzer
+\end{lstlisting}
+Python \texttt{3.12-slim} is baked in, and the build is multi-stage: a
+\texttt{builder} stage creates a virtualenv and installs
+\texttt{requirements.txt} into it, and the runtime stage copies only
+\texttt{/opt/venv} plus \texttt{ai/}, \texttt{data/}, \texttt{src/},
+\texttt{static/} out of it -- \texttt{pip}'s build cache and any compiler
+toolchain used to build wheels never reach the final image. The container
+also runs as a non-root \texttt{appuser}. We chose \texttt{slim} over
+\texttt{alpine} because several dependencies (\texttt{asyncpg},
+\texttt{cryptography} via \texttt{google-auth}) ship prebuilt \texttt{
+manylinux} wheels for glibc but not always for musl, so \texttt{alpine}
+risks a slower or failing build for a marginal size win; we chose it over
+the full \texttt{python:3.12} image because we don't need a system compiler
+or dev headers in the runtime stage.
+
+\par\noindent
+\textbf{Size, and an honest look at it.} The image is roughly
+\textbf{400\,MB}: the \texttt{python:3.12-slim} base ($\sim$130\,MB), the
+copied \texttt{/opt/venv} (\textbf{273\,MB} measured by installing
+\texttt{requirements.txt} into a clean virtualenv), and a few MB of
+application code and sample images. So we are about 3$\times$ the bare
+base image, and essentially all of that is dependencies rather than
+anything we wrote. The largest single items are \texttt{numpy}
+($\sim$70\,MB with its bundled libraries), \texttt{sqlalchemy}
+($\sim$23\,MB), \texttt{cryptography} and \texttt{asyncpg}
+($\sim$15\,MB each). The finding we did not expect is that
+\textbf{$\sim$70--80\,MB of the runtime image is test and type-checking
+tooling}: \texttt{requirements.txt} is a single list, so \texttt{mypy}
+(including its compiled \texttt{mypyc} extension), \texttt{pytest} and
+\texttt{pygments} are installed into the venv that the runtime stage
+copies, even though the container never runs a test. Splitting
+\texttt{requirements-dev.txt} out would cut close to a fifth of the image
+for no behavioural change, and that is the first thing we would do to this
+Dockerfile. A second, smaller defect from the same reading: the runtime
+stage copies \texttt{ai/}, \texttt{data/}, \texttt{src/} and
+\texttt{static/} but not the \texttt{foodanalyzer/} entrypoint package, so
+\texttt{python -m foodanalyzer} works from a checkout but not inside the
+container, where the CLI must be invoked as \texttt{python -m src.cli}.
+
+\subsection{Live deployment}
+
+\par\noindent
+Beyond the local Docker stack, the API and web UI are deployed on Render
+(free tier) at \url{https://food-analyzer-tx9l.onrender.com/}, with
+interactive Swagger UI docs at \texttt{/docs} and a health check at
+\texttt{/health} -- this is the same container image described above, not
+a separate build. The free tier spins the service down after a period of
+inactivity, so the first request after idle time can take 30--60s to wake
+it back up; this is a Render platform characteristic, not an application
+bug, but is worth mentioning during the oral defense demo in case the
+grader hits a cold start.
+
+\subsection{Configuration}
+
+\begin{deliverbox}
+\textbf{Required.} A short list of every environment variable the app reads, and what happens if each is missing.
+\end{deliverbox}
+
+\par\noindent
+Every variable below has a default in \texttt{Settings} except the three
+API keys, so a missing \texttt{.env} does not crash the process at startup
+-- it fails the first time a request actually needs the missing value.
+
+\begin{center}\small
+\begin{tabular}{lll}
+\toprule
+\textbf{Variable} & \textbf{Default} & \textbf{If missing} \\
+\midrule
+\texttt{LLM\_PROVIDER} & \texttt{gemini} & uses default provider \\
+\texttt{LLM\_MODEL} & \texttt{gemini-2.0-flash} & uses default model \\
+\texttt{GOOGLE\_API\_KEY} / \texttt{ANTHROPIC\_API\_KEY} / & \texttt{None} & first VLM call raises \\
+\quad\texttt{OPENAI\_API\_KEY} & & \texttt{ProviderError} \\
+\texttt{USDA\_API\_KEY} & \texttt{None} & first nutrition call raises \\
+\texttt{POSTGRES\_HOST/PORT/DB/USER/PASSWORD} & see README & connects to local defaults \\
+\texttt{NUTRITION\_CACHE\_TTL\_SECONDS} & 86400 & 24h cache TTL \\
+\texttt{MAX\_IMAGE\_SIZE\_MB} & 5 & 5\,MB upload limit \\
+\texttt{MAX\_PARALLEL} & 10 & semaphore bound of 10 \\
+\texttt{HTTP\_PORT} & 8000 & API listens on 8000 \\
+\texttt{LOG\_LEVEL} & \texttt{INFO} & root logger stays at \texttt{INFO} \\
+\texttt{UPLOAD\_DIR} & \texttt{uploads} & uploads written to \texttt{./uploads} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% =====================================================================
+\section{Limitations \& Future Work}\label{sec:limits}
+
+\begin{deliverbox}
+\textbf{Required.} 3--5 bullet points. Honest list of where the system is brittle, what it would take to productionize, and what you would do differently with another week.
+\end{deliverbox}
+
+\begin{probebox}
+\textit{Be honest:} no project is perfect. What was the worst design decision you made? What did you not get to test under load? What is the scenario most likely to break the system on a busy day?
+\end{probebox}
+
+\begin{itemize}[leftmargin=1.4em,itemsep=3pt]
+  \item \textbf{No per-call timeout in \texttt{AIService}.} Retries are
+  bounded (3 attempts, exponential backoff), but nothing caps how long a
+  single call to \texttt{ai.identify\_ingredients()} or a nutrition lookup
+  can block -- a hung VLM call would hang the whole request indefinitely.
+  Only the provided USDA client has its own internal 10s timeout.
+  \item \textbf{\texttt{GET /analyses} (list) does not exist.}
+  \texttt{Repository.list\_recent()} is implemented and tested, but no
+  route calls it, so the API can create and fetch single records but not
+  browse history.
+  \item \textbf{The API and CLI still write the orchestration twice.}
+  \texttt{cli.py} calls \texttt{FoodAnalyzer.analyze()}, while
+  \texttt{api.py} builds an equivalent five-step flow inline inside
+  \texttt{create\_app()} instead of reusing that class -- we did close half
+  of this gap by pulling the response-shaping step
+  (validated ingredient $\to$ \texttt{IngredientLine}/\texttt{MealTotals},
+  including the "missing lookup degrades to zero, doesn't drop the
+  ingredient" rule) out into the shared \texttt{core/lines.py}, so that one
+  piece of business logic cannot drift between the two paths even though
+  the surrounding five-step sequence is still written once per entry point.
+  \item \textbf{Single nutrition provider, no failover.} If USDA is down,
+  every analysis in that window returns ingredients with zeroed macros
+  rather than falling back to a second provider -- there is no equivalent
+  of the \texttt{LLM\_PROVIDER} swap-by-env-var for nutrition data.
+\end{itemize}
+
+\begin{itemize}[leftmargin=1.4em,itemsep=3pt]
+  \item \textbf{\texttt{MAX\_PARALLEL} is not the real concurrency bound.}
+  Because provider calls run through \texttt{asyncio.to\_thread}, the
+  effective limit is the smaller of the semaphore and the default thread
+  pool, \texttt{min(32, cpu\_count + 4)} -- 5 on a single-core host
+  (Section~\ref{sec:concurrency}). The configuration therefore promises
+  more than it delivers on exactly the kind of small instance we deployed
+  to.
+  \item \textbf{The cache is per-process and in-memory.} Two Uvicorn
+  workers keep two caches with no shared state, and every restart is a
+  cold start -- fine at our scale, wrong the moment the service is scaled
+  horizontally, where Redis with the same TTL would be the replacement.
+\end{itemize}
+
+\par\noindent
+\textbf{The worst decision, in hindsight}, was writing the API's
+orchestration inline in \texttt{create\_app()} instead of calling
+\texttt{FoodAnalyzer}. It felt cheaper on day 2 because the HTTP path
+needed upload handling and per-step 503s that the CLI path did not, and
+every later change then had to be made twice. We caught one instance of
+the resulting drift (the zeroed-macros rule) and fixed it by extracting
+\texttt{core/lines.py}, which closed roughly half the gap; we did not
+finish the job. The lesson we would carry forward is that the right move
+was to make \texttt{FoodAnalyzer} accept already-validated bytes and let
+each entry point own only its own I/O, rather than to duplicate the
+sequence and clean up afterwards.
+
+\par\noindent
+\textbf{What we never tested under load:} anything involving more than one
+request at a time. Our concurrency work is all \emph{within} a request --
+ten ingredients fanned out inside one \texttt{/analyze} call -- and we ran
+no test, benchmark, or manual trial with several clients posting at once.
+So the numbers in Section~\ref{sec:concurrency} describe a single user
+with a busy plate, not a busy service.
+
+\par\noindent
+\textbf{The scenario most likely to break us on a busy day} follows
+directly from that gap: $k$ simultaneous \texttt{POST /analyze} requests,
+each opening up to 10 nutrition lookups, produce up to $10k$ in-flight
+provider calls, because the semaphore is created per pipeline instance and
+bounds one request, not the process. Ten concurrent users is a plausible
+demo-day load and 100 outstanding USDA calls is not polite; the first
+symptom would be USDA 429s, which our retry would absorb silently into
+slower responses rather than reporting as rate limiting. The fix is small
+and we know what it is -- one process-wide semaphore created at startup and
+shared by every request, instead of one per pipeline -- but it is not in
+the code we are submitting.
+
+% =====================================================================
+\section{Tools \& Acknowledgements}\label{sec:tools}
+
+\begin{deliverbox}
+\textbf{Required.} Disclose substantial AI-assistant use. For each significant LLM-aided contribution: which module, which assistant (Claude/ChatGPT/Cursor/Copilot/etc.), and whether the team reviewed and adapted it.
+\end{deliverbox}
+
+\begin{probebox}
+\textit{Cultural note:} "AI helped with everything" is not a useful disclosure; "Cursor drafted the initial \texttt{retry\_policy.py}; we rewrote backoff logic after observing it hit the rate limit" is.
+\end{probebox}
+
+ 
+ 
+
+\par\noindent
+Claude was used throughout the project as a development and documentation assistant. It helped draft the \texttt{README.md}, architecture and API documentation, the initial report draft, and parts of the implementation, particularly around retry logic, asynchronous concurrency, SQLAlchemy patterns, and the frontend interface.
+
+All AI-generated material was reviewed, tested, and adapted by the team. We corrected factual issues, verified the implementation against the actual codebase and test results, and made the final design and coding decisions ourselves. All tests were written manually by the respective module owners. Each team member understands the complete codebase and can explain and defend the implementation during the oral defense.
+
+
+
+
+% =====================================================================
+\section*{References}
+\addcontentsline{toc}{section}{References}
+
+\begin{enumerate}[label={[\arabic*]},leftmargin=2.4em,itemsep=2pt]
+  \item FastAPI documentation -- \url{https://fastapi.tiangolo.com/}
+  \item Pydantic Settings documentation -- \url{https://docs.pydantic.dev/latest/concepts/pydantic_settings/}
+  \item SQLAlchemy 2.0 Asyncio documentation -- \url{https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html}
+  \item Python \texttt{asyncio} documentation, \texttt{Semaphore} and \texttt{gather} -- \url{https://docs.python.org/3/library/asyncio-sync.html}
+  \item USDA FoodData Central API documentation -- \url{https://fdc.nal.usda.gov/api-guide}
+  \item M. Brooker, \emph{Timeouts, retries, and backoff with jitter} -- Amazon Builders' Library, \url{https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/}. Shaped the retry policy: bounded attempts and exponential backoff, and the reason our lack of a per-call timeout is listed as the first limitation rather than a detail.
+  \item Python documentation, \texttt{asyncio.to\_thread} and \texttt{loop.set\_default\_executor} -- \url{https://docs.python.org/3/library/asyncio-task.html\#asyncio.to_thread}. The default-executor sizing documented here is what explains the 5.0$\times$ vs.\ 9.9$\times$ benchmark result in Section~\ref{sec:concurrency}.
+  \item OWASP, \emph{File Upload Cheat Sheet} -- \url{https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html}. Source of the two upload rules we added beyond the brief: never reuse the client-supplied filename, and validate content rather than \texttt{Content-Type}.
+\end{enumerate}
+
+\appendix
+% =====================================================================
+\section{Appendix --- Reproducing the benchmark}
+\textbf{Exact commands to reproduce the §\ref{sec:concurrency} benchmark.} Anyone with the repo and a valid \texttt{.env} should be able to run the lines below and get numbers within 20\% of the ones in the table.
+
+\begin{lstlisting}[style=python,language=bash,numbers=none]
+$ git clone https://github.com/Gunas12/Food_Analyzer.git
+$ cd Food_Analyzer
+$ python -m venv .venv && .venv\Scripts\activate   # or source .venv/bin/activate
+$ pip install -r requirements.txt
+$ $env:PYTHONPATH="."                              # or export PYTHONPATH=.
+$ python scripts/bench.py
+\end{lstlisting}
+
+\texttt{scripts/bench.py} uses a scripted \texttt{\_SlowFakeProvider} with a
+fixed simulated latency, not a live USDA call, so this reproduces without
+any API keys or \texttt{.env} -- the same command was used to produce the
+9.9$\times$ figure in Section~\ref{sec:concurrency}.
+
+\vspace{1em}\hrule\vspace{0.6em}
+\noindent\small\textit{End of report --- thank you for reading.}
+
+\end{document}
