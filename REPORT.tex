@@ -14,7 +14,6 @@
 \usepackage[final,protrusion=true,expansion=false]{microtype}
 \usepackage{amsmath,amssymb,graphicx,booktabs,array,tabularx,ragged2e}
 \usepackage{enumitem}
-\usepackage{multicol}
 \usepackage[parfill]{parskip}
 \usepackage{listings}
 \usepackage[most]{tcolorbox}
@@ -43,7 +42,6 @@
 \newcommand{\institution}{AI Academy, National AI Center}
 \newcommand{\semester}{Spring 2026}
 \newcommand{\code}[1]{\texttt{\detokenize{#1}}}
-\newcommand{\evidence}[1]{\par{\footnotesize\color{codegray}\textit{Repository evidence:} #1}\par}
 \newcolumntype{Y}{>{\RaggedRight\arraybackslash}X}
 \newtcolorbox{deliverbox}{colback=deliver,colframe=deliverframe,boxrule=0.5pt,
   arc=2pt,left=8pt,right=8pt,top=4pt,bottom=4pt}
@@ -51,12 +49,9 @@
   arc=2pt,left=8pt,right=8pt,top=4pt,bottom=4pt}
 \titleformat{\section}{\Large\bfseries\color{accent}}{\thesection.}{0.6em}{}
 \titleformat{\subsection}{\large\bfseries\color{accent}}{\thesubsection}{0.5em}{}
-\titlespacing*{\section}{0pt}{11pt}{5pt}
-\titlespacing*{\subsection}{0pt}{8pt}{4pt}
-\setlength{\parskip}{4pt}
-\setlist{leftmargin=1.4em,itemsep=3pt,topsep=3pt}
-\setcounter{tocdepth}{2}
 \emergencystretch=3em
+\hbadness=10000
+\hfuzz=2pt
 \lstdefinestyle{python}{language=Python,backgroundcolor=\color{backcolour},
   commentstyle=\color{codegreen},keywordstyle=\color{accent},
   numberstyle=\tiny\color{codegray},stringstyle=\color{codepurple},
@@ -64,37 +59,35 @@
   numbers=left,numbersep=6pt,tabsize=2,frame=single,framerule=0.4pt,
   rulecolor=\color{black!30},showstringspaces=false}
 \hypersetup{colorlinks=true,linkcolor=NavyBlue,urlcolor=NavyBlue,citecolor=NavyBlue,
-  pdftitle={T1 -- Food Analyzer Final Project Report},pdfauthor={Team T1}}
+  pdftitle={\coursecode\ Final Project Report},pdfauthor={\teamname}}
 \pagestyle{fancy}
 \fancyhf{}
 \fancyhead[L]{\small\textit{\coursecode\ -- Final Report -- \teamname}}
 \fancyhead[R]{\small\textit{\semester}}
-\fancyfoot[L]{\footnotesize\textit{\institution}}
+\fancyfoot[L]{\small\textit{\institution}}
 \fancyfoot[R]{\small Page \thepage\ of \pageref{LastPage}}
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\footrulewidth}{0.4pt}
 \begin{document}
 
-% Planned page 1: title, summary, contents.
 \begin{center}
-{\small \institution\\[0.2em]\coursecode\ -- \coursename\ -- \semester}\\[0.8em]
+{\small \textsc{\institution} \\[0.2em] \textsc{\coursecode\ -- \coursename\ -- \semester}}\\[1.2em]
 {\Large\bfseries\color{accent} Final Project Report}\\[0.3em]
-{\LARGE\bfseries\topicchoice}\\[0.4em]
+{\LARGE\bfseries\topicchoice}\\[0.6em]
 \rule{0.85\textwidth}{0.6pt}
 \end{center}
-\begin{tabularx}{\textwidth}{@{}lYlY@{}}
-\textbf{Team:} & \teamname & \textbf{Date:} & \reportdate\\
-\textbf{Repo:} & \repolink & \textbf{Tag:} & \texttt{v1.0-final}\\
-\textbf{Snapshot:} & \code{acce4e7} & \textbf{Branch:} & \code{main}\\
+\vspace{0.6em}
+\begin{tabularx}{\textwidth}{@{}lXlX@{}}
+\textbf{Team:} & \teamname & \textbf{Date:} & \reportdate \\
+\textbf{Repo:} & \repolink & \textbf{Tag:} & \texttt{v1.0-final} \\
+\textbf{Members:} & \multicolumn{3}{X@{}}{\small%
+  \mbox{\member{Günəş Məmmədova}{\href{https://github.com/Gunas12}{@Gunas12}}},\quad
+  \mbox{\member{Esmira Məmmədova}{\href{https://github.com/EsmiraMammadli}{@EsmiraMammadli}}},\newline
+  \mbox{\member{Əli Muradov}{\href{https://github.com/Ali-Muradov}{@Ali-Muradov}}},\quad
+  \mbox{\member{Pünhan Mürsəlov}{\href{https://github.com/Punhan0}{@Punhan0}}}
+}\\
 \end{tabularx}
-\vspace{0.15em}
-{\small\noindent
-\begin{tabularx}{\linewidth}{@{}lYY@{}}
-\textbf{Members:} & \member{Günəş Məmmədova}{\href{https://github.com/Gunas12}{@Gunas12}}
-  & \member{Esmira Məmmədova}{\href{https://github.com/EsmiraMammadli}{@EsmiraMammadli}}\\
-& \member{Əli Muradov}{\href{https://github.com/Ali-Muradov}{@Ali-Muradov}}
-  & \member{Pünhan Mürsəlov}{\href{https://github.com/Punhan0}{@Punhan0}}\\
-\end{tabularx}}
+\vspace{0.4em}\hrule\vspace{0.6em}
 
 \section*{Executive Summary}
 \addcontentsline{toc}{section}{Executive Summary}
@@ -105,17 +98,9 @@ The saved synthetic benchmark reports 1.517 seconds sequentially and 0.154 secon
 Bounded provider-error retries, a thread-safe 24-hour cache and partial-result handling support recovery, while a historical test log records 143 passing tests and 97\% coverage of \code{src/}.
 The main limitation is that missing nutrition is represented as zero without an explicit completeness flag, so successful delivery does not guarantee complete or accurate nutritional data.
 
-\section*{Contents}
-{\footnotesize
-\setlength{\parskip}{0pt}
-\begin{multicols}{2}
-\makeatletter
-\@starttoc{toc}
-\makeatother
-\end{multicols}}
+\tableofcontents
+\vspace{0.6em}\hrule\vspace{0.4em}
 
-\clearpage
-% Planned page 2.
 \section{Project Overview}
 \subsection{Problem framing \& scope}
 Estimating a meal's nutritional content manually requires identifying ingredients, estimating portions and finding compatible nutrition records. Food Analyzer accepts a JPEG or PNG, asks a vision-language model for ingredient names, grams and confidence values, and combines per-100-gram nutrition facts into per-ingredient rows and meal totals. The estimates depend on both visual recognition and the selected nutrition match; the software does not establish a measured ground truth for a meal.
@@ -131,10 +116,6 @@ There is configuration drift: \code{.env.example} still selects \code{anthropic}
 
 The team did not modify the public interface of the provided \code{ai/} package: comparison with the repository's initial commit \code{b976c0d} shows no changes in that directory or in \code{tests/test_ai_smoke.py}. This establishes continuity within the available repository history, not an independent comparison with an external distribution archive. Calls use \code{identify_ingredients}, \code{NutritionProvider.lookup} and \code{compute_totals}; the provider adapters remain part of the supplied code.
 
-\evidence{\code{TOPIC.md}; \code{README.md}; \code{src/api.py}; \code{src/cli.py}; \code{foodanalyzer/__main__.py}; \code{src/config.py}; \code{ai/providers/factory.py}; Git comparison \code{b976c0d..acce4e7}.}
-
-\clearpage
-% Planned page 3.
 \section{Architecture}\label{sec:arch}
 \subsection{Module map}
 \begin{center}
@@ -196,8 +177,6 @@ The team did not modify the public interface of the provided \code{ai/} package:
 \end{tabularx}}
 The service and shared totals helper cross the AI boundary; \code{Repository} crosses the database boundary. Switching among supplied VLMs can use environment/dependency changes without editing business logic, provided the selected SDK is installed and the effective environment is correct. The diagram does not imply a single shared API/CLI orchestration method.
 
-\clearpage
-% Planned page 4.
 \subsection{OOP design \& key abstractions}
 \code{NutritionPipeline} composes a \code{NutritionProvider}, \code{AIService}, \code{NutritionCache} and semaphore. Provider lookup, retry policy and cache lifetime remain separate responsibilities. A pipeline is not a specialized cache or provider, so inheritance between those classes would misrepresent their relationship. Replacing an injected collaborator allows a test to control failures, cache state or scheduling without invoking an external service.
 
@@ -226,10 +205,6 @@ The following seven lines are copied from \code{src/wiring.py}. They show the te
 \end{enumerate}
 The application models use \code{extra="forbid"}, but their numeric fields do not repeat all of \code{Ingredient}'s bounds. Dictionaries intentionally cross the nutrition and serialization boundaries; an assertion that no dictionaries cross modules would be false. Model separation permits response/storage evolution without modifying the supplied AI types~\cite{pydantic}.
 
-\evidence{\code{src/wiring.py}; \code{src/models.py}; \code{src/core/lines.py}; \code{src/storage/repository.py}; \code{ai/schemas.py}; \code{ai/nutrition.py}.}
-
-\clearpage
-% Planned page 5.
 \section{Concurrency \& Performance}\label{sec:concurrency}
 \subsection{Why this concurrency model}
 Nutrition lookups are independent synchronous operations whose network waiting can overlap. \code{asyncio.gather()} schedules one coroutine per distinct normalized ingredient; \code{asyncio.to_thread()} runs each actual synchronous call outside the event-loop thread. The semaphore gates entry to a lookup/retry sequence, including its backoff sleeps. Async orchestration fits the HTTP application and avoids rewriting the supplied provider API; it still uses worker threads for the blocking work~\cite{asyncio,semaphore}.
@@ -254,10 +229,6 @@ The measured times are close to the simulated 1.5-second sequential and 0.15-sec
 The system has concurrency admission and exponential backoff, not a full requests-per-minute limiter. It has no token bucket, shared request budget, jitter or \code{Retry-After} interpretation. HTTP 429 is retried only when the provider converts it into \code{ProviderError}; the same wrapper handles other provider errors. There is no saved evidence of a real 429 experiment.
 
 Event-gated tests exercise an explicit two-call overlap and bounds of one, two and three across batches. These verify scheduling correctness, not elapsed-time performance or a maximum live traffic burst. A production request budget and a shared API admission gate remain future work.
-\evidence{\code{src/concurrency/pipeline.py}; \code{src/api.py}; \code{scripts/bench.py}; \code{artefacts/benchmark.txt}; \code{tests/test_pipeline.py}.}
-
-\clearpage
-% Planned page 6.
 \section{Robustness \& Error Handling}\label{sec:robustness}
 \subsection{Wrapping the AI module}
 \code{AIService} implements retries manually, without \code{tenacity}. Only \code{ProviderError} is caught; with defaults there are three total attempts and two asynchronous delays of 0.5 and 1.0 seconds. More generally, delay after failed attempt $k$ is $b\,2^{k-1}$, for $k<m$, where $b$ is \code{base_delay} and $m$ is \code{max_attempts}. The final error is re-raised unchanged. Non-provider programming errors propagate immediately. The constructor rejects noninteger/boolean attempt counts, counts below one, and negative or nonfinite delays.
@@ -282,8 +253,6 @@ Environment & Pydantic validates provider/log-level enums, ports 1--65535, posit
 \end{tabularx}}
 Magic-byte checks are not complete image decoding. The API reads the full upload before applying its byte limit; this is not a streaming memory cap. Signature-valid but corrupted images and very large inputs remain limitations.
 
-\clearpage
-% Planned page 7.
 \section{Storage \& Caching}\label{sec:storage}
 \subsection{Schema}
 The deployed configuration targets PostgreSQL through SQLAlchemy's asynchronous engine and \code{asyncpg}. Offline repository tests substitute in-memory SQLite; SQLite is not the production database. The following table transcribes the actual ORM mapping, rather than presenting an unverified SQL migration. Async session/engine APIs are documented by SQLAlchemy~\cite{sqlalchemy}.
@@ -312,8 +281,6 @@ The pipeline checks cache before acquiring the semaphore and again after enterin
 \subsection{Strategy \& historical coverage}
 The tests use fake VLM/nutrition providers, FastAPI \code{TestClient}, fake API repositories and SQLite-backed repository/analyzer fixtures. CLI wiring is monkeypatched; service retries use \code{AsyncMock}; clocks, thread IDs and event gates control time and concurrency. They do not need real provider responses to exercise these paths~\cite{pytest}.
 
-\clearpage
-% Planned page 8.
 The committed \code{artefacts/coverage.txt} records the following historical run. It was added in \code{3ff73fb}, before later refactoring and logging/validation changes. In particular, its coverage table does not include the subsequently added \code{src/core/lines.py}. It must not be represented as coverage freshly measured at \code{acce4e7}.
 
 \begin{center}\small
@@ -340,8 +307,6 @@ Cache tests cover the exact TTL boundary, Unicode case folding, refresh, zero TT
 \subsection{Docker image}
 \code{Dockerfile} uses two \code{python:3.12-slim} stages, builds a virtual environment and copies it into a non-root runtime image~\cite{docker}. It copies \code{ai/}, \code{data/}, \code{src/} and \code{static/}, then runs Uvicorn on port 8000. The \code{foodanalyzer/} alias package, tests and benchmark script are not copied. Compose builds this API and starts \code{postgres:16-alpine}, waiting for the database health check. The repository-backed build/start command is \code{docker compose up --build}; shutdown is \code{docker compose down}. No saved final-image build, image size, digest or runtime transcript exists in the inspected evidence, and the Python patch version is not pinned; this report does not claim those missing measurements.
 
-\clearpage
-% Planned page 9.
 \subsection{Configuration}
 \code{Settings} reads environment variables and \code{.env}, ignores unknown fields and is cached by \code{get_settings()}. The table distinguishes its defaults from the supplied providers' direct environment reads. Pydantic's settings mechanism is documented separately~\cite{settings}.
 
@@ -374,12 +339,10 @@ Before running Compose, the documented Gemini values must replace the Anthropic 
 \item \textbf{Validation and observability.} Uploads are fully buffered and only signature-checked; API logging can expose provider details. Add bounded streaming, complete image validation and consistent redaction, with regression and load tests.
 \end{itemize}
 
-\clearpage
-% Planned page 10.
 \section{Tools \& Acknowledgements}\label{sec:tools}
 The course-provided \code{ai/} package remained a frozen external contract. Codex assisted User \#3 with the service wrapper, TTL cache, concurrent pipeline, related tests and explanations; it also inspected repository evidence, drafted this report and diagram, and compiled the template-based PDF. It did not rerun tests, call live providers or build Docker images. The team remains responsible for the final work; individual review/adaptation confirmations and any additional assistant use must be declared by the relevant members.
 
-\section{Team Contributions}\label{sec:team}
+\subsection*{Team contributions}
 Names and accounts follow the supplied team list. Responsibilities combine file-level Git history with \code{report/CONTRIBUTION_STATEMENT.md}; they describe primary areas, not sole authorship or effort percentages.
 
 {\small
@@ -393,17 +356,6 @@ Names and accounts follow the supplied team list. Responsibilities combine file-
 
 Raw commit counts are not treated as effort shares. Signatures remain administrative submission items. The statement names \code{v1.0-final}, but that tag is absent locally, so the report identifies reviewed commit \code{acce4e7} separately.
 
-\appendix
-\section{Appendix --- Reproducing the benchmark}\label{sec:repro}
-From the repository root, this offline command runs ten fake 150 ms lookups with parallel limit ten; it needs no API key or database.
-\begin{lstlisting}[style=python,language=bash,numbers=none]
-# PowerShell: make repository imports visible.
-$env:PYTHONPATH="."
-python scripts/bench.py
-\end{lstlisting}
-This reproduces the workload definition, not a guaranteed time. Future runs should preserve the environment, revision and raw output. Historical coverage used \code{pytest --cov=src --cov-report=term-missing}; it was not rerun here.
-
-\clearpage
 \begin{thebibliography}{10}
 \addcontentsline{toc}{section}{References}
 \bibitem{repo} Team T1. \textit{Food Analyzer source and project evidence}, reviewed commit \code{acce4e71798492ad4676f7967a0b47635fccd61a}. \url{https://github.com/Gunas12/Food_Analyzer/tree/acce4e71798492ad4676f7967a0b47635fccd61a}. Saved measurements: \code{artefacts/benchmark.txt} and \code{artefacts/coverage.txt}; ownership: \code{report/CONTRIBUTION_STATEMENT.md}.
@@ -418,6 +370,18 @@ This reproduces the workload definition, not a guaranteed time. Future runs shou
 \bibitem{pytest} pytest. \textit{How to monkeypatch/mock modules and environments}. \url{https://docs.pytest.org/en/stable/how-to/monkeypatch.html}.
 \bibitem{docker} Docker. \textit{Multi-stage builds}. \url{https://docs.docker.com/build/building/multi-stage/}.
 \end{thebibliography}
-{\footnotesize Official documentation URLs were checked during preparation on 19 September 2026. Implementation claims are grounded in the reviewed repository; saved measurements retain their historical scope.}
+
+\appendix
+\section{Appendix --- Reproducing the benchmark}\label{sec:repro}
+From the repository root, this offline command runs ten fake 150 ms lookups with parallel limit ten; it needs no API key or database.
+\begin{lstlisting}[style=python,language=bash,numbers=none]
+# PowerShell: make repository imports visible.
+$env:PYTHONPATH="."
+python scripts/bench.py
+\end{lstlisting}
+This reproduces the workload definition, not a guaranteed time. Future runs should preserve the environment, revision and raw output. Historical coverage used \code{pytest --cov=src --cov-report=term-missing}; it was not rerun here.
+
+\vspace{1em}\hrule\vspace{0.6em}
+\noindent\small\textit{End of report --- thank you for reading.}
 
 \end{document}
