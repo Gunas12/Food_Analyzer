@@ -95,8 +95,14 @@
 
 - `requirements.txt` (with the whole team) — API deps (`fastapi`, `uvicorn`, `python-multipart`, `httpx`) kept in sync; also pinned `numpy`, `pydantic`, `requests`, `pytest` to exact versions
 - Template/doc files (`.github/pull_request_template.md`) — team PR-description checklist
+- `src/config.py`, `src/cli.py` (with Gunash Mammadova) — added `configure_logging()`
+  to wire the existing `log_level` setting into Python's `logging` module (previously
+  declared in `Settings` but never applied)
+- `src/validation.py` (co-owned) — extracted `has_image_magic_bytes()` helper, reused it
+  in `src/api.py`'s upload validation so `/analyze` no longer trusts the client-supplied
+  Content-Type header alone
 
-**PRs:** #10 (add: FastAPI endpoints for analyze/health/get), #13 (add: google-genai dependency, static web UI, PR template), #15, #18 (fix(api): assert database_url before Repository construction), #19 (user4/fix-api-mypy)
+**PRs:** #10 (add: FastAPI endpoints for analyze/health/get), #13 (add: google-genai dependency, static web UI, PR template), #15, #18 (fix(api): assert database_url before Repository construction), #19 (user4/fix-api-mypy), #24 (fix: dedupe API/CLI ingredient logic, add foodanalyzer entrypoint), #25 (fix: wire log_level to logging.basicConfig; validate image magic bytes in API upload), #26 (docs: update contribution statement for logging/validation fix)
 
 **Reviewed:**
 
